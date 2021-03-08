@@ -14,27 +14,49 @@
 
 namespace PHPBlock\Network;
 
-use GuzzleHttp\ClientInterface as HttpClientInterface;
-use Psr\Http\Message\RequestInterface;
+use PHPBlock\JSONRPC\Request;
+use PHPBlock\JSONRPC\Response;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use React\EventLoop\Factory as Loop;
+use React\EventLoop\LoopInterface;
+use React\Http\Browser;
+use React\Http\Server;
 
-abstract class Base
+abstract class Base implements BaseInterface
 {
-    protected $httpClient;
+    private static FactoryInterface $builder;
+    protected Browser $client;
+    private LoopInterface $looper;
 
-    public function __construct(string $endpoint, HttpClientInterface $httpClient = null)
+    public function __construct(FactoryInterface $Factory)
     {
-        $this->httpClient = $httpClient ?? new \GuzzleHttp\Client([
-            'base_uri' => $endpoint
-        ]);
+        $this->looper = Loop::create();
+        static::$builder = $Factory;
     }
 
-    public function call(string $method)
+    /**
+     * {@inheritdoc}
+     */
+    public function factory(): FactoryInterface
     {
+        return $this->builder;
     }
 
-    private function send(RequestInterface $request): ResponseInterface
+    /**
+     * {@inheritdoc}
+     */
+    public function loop(): LoopInterface
     {
-        return $this->httpClient->send($request);
+        return $this->looper;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function server(callable $response): Server
+    {
+        return new Server($this->loop(), $response);
     }
 }

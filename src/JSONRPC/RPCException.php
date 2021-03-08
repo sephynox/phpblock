@@ -12,9 +12,9 @@
 
 namespace PHPBlock\JSONRPC;
 
-use Exception;
+use React\Http\Message\ResponseException;
 
-class RPCException extends Exception implements RPCExceptionInterface
+class RPCException extends ResponseException implements RPCExceptionInterface
 {
     /**
      * @var array

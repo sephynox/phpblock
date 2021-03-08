@@ -23,8 +23,6 @@ abstract class EthTypeTest extends TypingTest
      */
     protected $instance;
 
-    private string $address = '0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359';
-
     /**
      * Test the conversion.
      *
@@ -43,8 +41,11 @@ abstract class EthTypeTest extends TypingTest
      */
     public function testChecksumEncode(): void
     {
-        $this->instance = new Address($this->address);
-        $this->assertEquals($this->address, $this->instance->checksumEncode($this->address));
+        $this->instance = new Address($_ENV['ETH_CHECKSUM_ADDRESS']);
+        $this->assertEquals(
+            $_ENV['ETH_CHECKSUM_ADDRESS'],
+            $this->instance->checksumEncode($_ENV['ETH_CHECKSUM_ADDRESS'])
+        );
     }
 
     /**

@@ -12,9 +12,9 @@
 
 namespace PHPBlock\JSONRPC;
 
-use GuzzleHttp\Psr7\Response as Psr7Response;
+use React\Http\Message\Response as ReactResponse;
 
-class Response extends Psr7Response implements ResponseInterface
+class Response extends ReactResponse implements ResponseInterface
 {
     private array $parsedBody = [
         "error" => null,

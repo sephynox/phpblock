@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * JSON RPC Request Interface.
+ *
+ * @package PHPBlock
+ * @category Network
+ * @author Tanveer Wahid <tan@wahid.email>
+ * @license MIT
+ * @access public
+ */
+
+namespace PHPBlock\JSONRPC;
+
+use PHPBlock\Network\FactoryInterface;
+use PHPBlock\JSONRPC\RequestInterface;
+use PHPBlock\JSONRPC\ResponseInterface;
+
+interface RPCFactoryInterface extends FactoryInterface
+{
+    /**
+     * Create a JSON RPC Request object.
+     *
+     * @param string $method
+     * @param integer $id
+     * @param array $body
+     * @param array $headers
+     *
+     * @return Request
+     */
+    public function makeRequest(
+        string $method,
+        int $id,
+        array $body = [],
+        array $headers = []
+    ): RequestInterface;
+
+    /**
+     * Create a JSON RPC response object.
+     *
+     * @param integer $status
+     * @param array $body
+     * @param array $headers
+     *
+     * @return ResponseInterface
+     */
+    public function makeResponse(
+        int $status,
+        array $body = [],
+        array $headers = []
+    ): ResponseInterface;
+}

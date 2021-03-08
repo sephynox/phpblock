@@ -12,9 +12,9 @@
 
 namespace PHPBlock\JSONRPC;
 
-use GuzzleHttp\Psr7\Request as Psr7Request;
+use React\Http\Message\ServerRequest;
 use PHPBlock\JSONRPC\RequestInterface;
 
-class Request extends Psr7Request implements RequestInterface
+class Request extends ServerRequest implements RequestInterface
 {
 }

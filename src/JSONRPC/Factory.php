@@ -10,14 +10,14 @@
  * @access public
  */
 
-namespace PHPBlock\Network;
+namespace PHPBlock\JSONRPC;
 
 use PHPBlock\JSONRPC\Request;
 use PHPBlock\JSONRPC\Response;
 use PHPBlock\JSONRPC\RequestInterface;
 use PHPBlock\JSONRPC\ResponseInterface;
 
-class Factory
+class Factory implements RPCFactoryInterface
 {
     public const METHOD = 'POST';
     public const KEY_VERSION = 'jsonrpc';

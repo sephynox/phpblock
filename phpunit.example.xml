@@ -1,0 +1,11 @@
+<phpunit bootstrap="vendor/autoload.php">
+    <testsuites>
+        <testsuite name="PHPBlock">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="ETH_TEST_CLIENT" value="" force="true" />
+        <env name="ETH_TEST_ADDRESS" value="" force="true" />
+    </php>
+</phpunit>
