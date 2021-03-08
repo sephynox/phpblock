@@ -27,12 +27,13 @@ jobs:
           ${{ runner.os }}-php-
 
     - name: Install dependencies
-      run: composer install --no-progress 
+      run: composer install --no-progress  
+
+    - name: Copy configuration file
+      run: cp phpunit.example.xml phpunit.xml
 
     - name: Run test suite
-      run: composer run-script tests
-      env:
-        ETH_TEST_CLIENT: "tbd"
-        ETH_CHECKSUM_ADDRESS: "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359"
+      run: |
+        composer run-script tests
 
         

@@ -5,7 +5,6 @@
         </testsuite>
     </testsuites>
     <php>
-        <env name="ETH_TEST_CLIENT" value="" force="true" />
-        <env name="ETH_TEST_ADDRESS" value="" force="true" />
+        <env name="ETH_CHECKSUM_ADDRESS" value="0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359" force="true" />
     </php>
 </phpunit>
