@@ -12,8 +12,13 @@
         "role": "Developer"
     }],
     "minimum-stability": "dev",
+    "config": {
+        "platform": {
+            "php": "7.4"
+        }
+    },
     "require": {
-        "php": ">=7.4.0",
+        "php": ">=7.4",
         "ext-json": "*",
         "guzzlehttp/guzzle": "^7.1",
         "kornrunner/keccak": "dev-master"
