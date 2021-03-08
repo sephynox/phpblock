@@ -12,7 +12,7 @@
 
 namespace PHPBlock\Network\Ethereum\Type;
 
-use PHPBlock\Network\Ethereum\Exception\AddressException;
+use PHPBlock\Network\Ethereum\Exception\HashException;
 
 use function PHPBlock\Helper\byteToHex;
 use function PHPBlock\Helper\hexToByte;
@@ -33,7 +33,7 @@ class Hash32 extends EthType
         $strValue = strtolower($this->stripPrefix($value));
 
         if (64 !== strlen($strValue)) {
-            throw new AddressException($value);
+            throw new HashException($value);
         }
 
         return hexToByte($strValue);
