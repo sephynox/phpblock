@@ -43,9 +43,6 @@
         "friendsofphp/php-cs-fixer": "3.0.x-dev"
     },
     "scripts": {
-        "post-install-cmd": [
-            "@tests"
-        ],
         "tests": [
             "./vendor/bin/phpunit tests",
             "./vendor/bin/phpbench run tests/ --report=default"
