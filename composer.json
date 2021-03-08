@@ -39,6 +39,9 @@
     },
     "scripts": {
         "post-install-cmd": [
+            "@tests"
+        ],
+        "tests": [
             "./vendor/bin/phpunit tests",
             "./vendor/bin/phpbench run tests/ --report=default"
         ]
