@@ -37,6 +37,12 @@
         "brainmaestro/composer-git-hooks": "dev-master",
         "friendsofphp/php-cs-fixer": "3.0.x-dev"
     },
+    "scripts": {
+        "post-install-cmd": [
+            "./vendor/bin/phpunit tests",
+            "./vendor/bin/phpbench run tests/ --report=default"
+        ]
+    },
     "extra": {
         "hooks": {
             "pre-commit": [
@@ -44,7 +50,7 @@
                 "./vendor/bin/php-cs-fixer fix src/"
             ],
             "pre-push": [
-                "php-cs-fixer fix --dry-run src/",
+                "./vendor/bin/php-cs-fixer --dry-run src/",
                 "./vendor/bin/phpunit tests",
                 "./vendor/bin/phpbench run tests/ --report=default"
             ],
