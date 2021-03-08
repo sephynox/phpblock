@@ -1,0 +1,4 @@
+{
+    "php_disable_ini": true,
+    "bootstrap": "vendor/autoload.php"
+}

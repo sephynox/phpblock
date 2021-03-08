@@ -1,0 +1,54 @@
+{
+    "name": "sephynox/phpblock",
+    "type": "library",
+    "description": "A lightweight PHP RPC client for blockchain networks.",
+    "keywords": ["php", "ethereum", "rpc", "blockchain"],
+    "homepage": "https://github.com/sephynox/phpblock",
+    "license": "MIT",
+    "authors": [{
+        "name": "Tanveer Wahid",
+        "email": "tan@wahid.email",
+        "homepage": "http://wahid.tech",
+        "role": "Developer"
+    }],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.4.0",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^7.1",
+        "kornrunner/keccak": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "PHPBlock\\": "src/"
+        },
+        "files": [
+            "src/Helper/HexTools.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PHPBlock\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9",
+        "phpbench/phpbench": "1.0.x-dev",
+        "brainmaestro/composer-git-hooks": "dev-master",
+        "friendsofphp/php-cs-fixer": "3.0.x-dev"
+    },
+    "extra": {
+        "hooks": {
+            "pre-commit": [
+                "echo committing as $(git config user.name)",
+                "./vendor/bin/php-cs-fixer fix src/"
+            ],
+            "pre-push": [
+                "php-cs-fixer fix --dry-run src/",
+                "./vendor/bin/phpunit tests",
+                "./vendor/bin/phpbench run tests/ --report=default"
+            ],
+            "post-merge": "composer install"
+        }
+    }
+}
