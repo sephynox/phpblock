@@ -13,6 +13,7 @@
 declare(strict_types=1);
 require_once 'EthTypeTest.php';
 
+use PHPBlock\Network\Ethereum\Type\Address;
 use PHPBlock\Network\Ethereum\Type\ChecksumAddress;
 
 final class ChecksumAddressTest extends EthTypeTest
@@ -21,6 +22,21 @@ final class ChecksumAddressTest extends EthTypeTest
     {
         $Address = new ChecksumAddress($this->getValue());
         $Address->checksumEncode($this->getValue());
+    }
+
+    /**
+     * Test checksum matches EIP-55.
+     * @see https://eips.ethereum.org/EIPS/eip-55
+     *
+     * @return void
+     */
+    public function testChecksumEncode(): void
+    {
+        $this->instance = new Address($_ENV['ETH_CHECKSUM_ADDRESS']);
+        $this->assertEquals(
+            $_ENV['ETH_CHECKSUM_ADDRESS'],
+            $this->instance->checksumEncode($_ENV['ETH_CHECKSUM_ADDRESS'])
+        );
     }
 
     #region TypingTest Members

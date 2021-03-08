@@ -27,10 +27,12 @@ jobs:
           ${{ runner.os }}-php-
 
     - name: Install dependencies
-      run: composer install
-
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
+      run: composer install --no-progress 
 
     - name: Run test suite
       run: composer run-script tests
+      env:
+        ETH_TEST_CLIENT: "tbd"
+        ETH_CHECKSUM_ADDRESS: "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359"
+
+        
