@@ -12,9 +12,9 @@
 
 namespace PHPBlock\JSONRPC;
 
-use React\Http\Message\ServerRequest;
 use PHPBlock\JSONRPC\RequestInterface;
+use RingCentral\Psr7\Request as HttpRequest;
 
-class Request extends ServerRequest implements RequestInterface
+class Request extends HttpRequest implements RequestInterface
 {
 }

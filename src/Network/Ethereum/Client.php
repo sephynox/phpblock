@@ -29,19 +29,15 @@ class Client extends Base
         parent::__construct(new Factory($uri));
     }
 
+    /**
+     * Call the eth_protocolVersion endpoint.
+     * @see https://eth.wiki/json-rpc/API#eth_protocolversion
+     *
+     * @return PromiseInterface
+     */
     public function protocolVersion() #: PromiseInterface
     {
-        // $deferred = new Deferred();
-        // $request = $this->factory()->makeRequest(__METHOD__, 67);
-
-        // $this->client->request()
-        //     if ($error) {
-        //         $deferred->reject($error);
-        //     } else {
-        //         $deferred->resolve($result);
-        //     }
-        // });
-
-        // return $deferred->promise();
+        // $Request = $this->factory()->makeRequest();
+        // return $this->browser->post();
     }
 }

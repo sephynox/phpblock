@@ -12,8 +12,9 @@
 
 namespace PHPBlock\Network;
 
-use React\EventLoop\LoopInterface;
 use React\Http\Server;
+use React\Http\Browser;
+use React\EventLoop\LoopInterface;
 use PHPBlock\Network\FactoryInterface;
 
 interface BaseInterface
@@ -23,4 +24,6 @@ interface BaseInterface
     public function loop(): LoopInterface;
 
     public function server(callable $response): Server;
+
+    public function client(): Browser;
 }

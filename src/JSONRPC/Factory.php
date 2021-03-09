@@ -37,14 +37,7 @@ class Factory implements RPCFactoryInterface
     }
 
     /**
-     * Create a JSON RPC Request object.
-     *
-     * @param string $method
-     * @param integer $id
-     * @param array $body
-     * @param array $headers
-     *
-     * @return Request
+     * {@inheritdoc}
      */
     public function makeRequest(
         string $method,
@@ -57,27 +50,13 @@ class Factory implements RPCFactoryInterface
     }
 
     /**
-     * Create a JSON RPC response object.
-     *
-     * @param integer $status
-     * @param array $body
-     * @param array $headers
-     *
-     * @return ResponseInterface
+     * {@inheritdoc}
      */
     public function makeResponse(
         int $status,
-        array $body = [],
+        string $body = '',
         array $headers = []
     ): ResponseInterface {
-        $arrBody = [
-            static::KEY_VERSION => $this->version,
-            static::KEY_RESULT => null,
-            static::KEY_ERROR => null,
-            static::KEY_ID => null,
-        ];
-
-        $strBody = $this->makeJson(array_merge($arrBody, $body));
         return new Response($status, $headers, $body);
     }
 

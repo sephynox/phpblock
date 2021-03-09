@@ -12,8 +12,8 @@
 
 namespace PHPBlock\JSONRPC;
 
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\RequestInterface as HttpRequestInterface;
 
-interface RequestInterface extends ServerRequestInterface
+interface RequestInterface extends HttpRequestInterface
 {
 }

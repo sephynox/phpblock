@@ -12,16 +12,18 @@
 
 namespace PHPBlock\JSONRPC;
 
-use React\Http\Message\Response as ReactResponse;
+use RingCentral\Psr7\Response as HttpResponse;
 
-class Response extends ReactResponse implements ResponseInterface
+class Response extends HttpResponse implements ResponseInterface
 {
-    private array $parsedBody = [
+    private static array $parsedBodyTemplate = [
         "error" => null,
         "jsonrpc" => null,
         "id" => null,
         "result" => null
     ];
+
+    private array $responseData = [];
 
     public function __construct(
         $status = 200,
@@ -30,15 +32,16 @@ class Response extends ReactResponse implements ResponseInterface
         $version = '1.1',
         $reason = null
     ) {
-        $jsonData = \json_decode($body == "" ? "{}" : $body);
-
-        if (json_last_error() == JSON_ERROR_NONE) {
-            $this->parsedBody = $this->parsedBody + $jsonData;
-        } else {
-            $this->parsedBody = $this->parsedBody + [$body];
-        }
-
         parent::__construct($status, $headers, $body, $version, $reason);
+        $this->responseData = (array) json_decode($this->getBody(), true);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getRPCResultTemplate(): array
+    {
+        return static::$parsedBodyTemplate;
     }
 
     /**
@@ -46,11 +49,11 @@ class Response extends ReactResponse implements ResponseInterface
      */
     public function getRPCError(): ?RPCExceptionInterface
     {
-        if (isset($this->parsedBody["error"])) {
+        if (isset($this->responseData["error"])) {
             return new RPCException(
-                $this->parsedBody["error"]["message"],
-                $this->parsedBody["error"]["code"],
-                $this->parsedBody["error"]["data"]
+                $this->responseData["error"]["message"],
+                $this->responseData["error"]["code"],
+                $this->responseData["error"]["data"]
             );
         }
     }
@@ -59,7 +62,11 @@ class Response extends ReactResponse implements ResponseInterface
      */
     public function getRPCVersion(): string
     {
-        return $this->parsedBody["jsonrpc"];
+        if (!isset($this->responseData["result"])) {
+            throw new RPCException("Malformed response lacking version", -32700);
+        }
+
+        return $this->responseData["jsonrpc"];
     }
 
     /**
@@ -67,7 +74,11 @@ class Response extends ReactResponse implements ResponseInterface
      */
     public function getRPCId(): int
     {
-        return $this->parsedBody["id"];
+        if (!isset($this->responseData["result"])) {
+            throw new RPCException("Malformed response lacking id", -32700);
+        }
+
+        return $this->responseData["id"];
     }
 
     /**
@@ -75,6 +86,10 @@ class Response extends ReactResponse implements ResponseInterface
      */
     public function getRPCResult()
     {
-        return $this->parsedBody["result"];
+        if (!isset($this->responseData["result"])) {
+            throw new RPCException("Malformed response lacking result", -32700);
+        }
+
+        return $this->responseData["result"];
     }
 }

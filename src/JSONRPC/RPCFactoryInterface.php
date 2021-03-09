@@ -39,14 +39,14 @@ interface RPCFactoryInterface extends FactoryInterface
      * Create a JSON RPC response object.
      *
      * @param integer $status
-     * @param array $body
+     * @param string $body
      * @param array $headers
      *
      * @return ResponseInterface
      */
     public function makeResponse(
         int $status,
-        array $body = [],
+        string $body = '',
         array $headers = []
     ): ResponseInterface;
 }

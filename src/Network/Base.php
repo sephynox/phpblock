@@ -27,12 +27,13 @@ use React\Http\Server;
 abstract class Base implements BaseInterface
 {
     private static FactoryInterface $builder;
-    protected Browser $client;
+    protected Browser $browser;
     private LoopInterface $looper;
 
     public function __construct(FactoryInterface $Factory)
     {
         $this->looper = Loop::create();
+        $this->browser = new Browser($this->looper);
         static::$builder = $Factory;
     }
 
@@ -58,5 +59,13 @@ abstract class Base implements BaseInterface
     public function server(callable $response): Server
     {
         return new Server($this->loop(), $response);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function client(): Browser
+    {
+        return $this->browser;
     }
 }
