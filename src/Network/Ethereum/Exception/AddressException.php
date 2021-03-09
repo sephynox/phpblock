@@ -1,23 +1,21 @@
 <?php
 
 /**
- * JSON RPC Exception.
+ * Ethereum Network Exception.
  *
  * @package PHPBlock
- * @category JSONRPC
+ * @category Ethereum
  * @author Tanveer Wahid <tan@wahid.email>
  * @license MIT
- * @version $Revision: 0.1 $
  * @access public
- * @see https://github.com/sephynox/phpblock
  */
 
 namespace PHPBlock\Network\Ethereum\Exception;
 
-use Exception;
 use Throwable;
+use PHPBlock\Network\NetworkException;
 
-class AddressException extends Exception
+class AddressException extends NetworkException
 {
     public function __construct(string $message, $code = 0, ?Throwable $previous = null)
     {

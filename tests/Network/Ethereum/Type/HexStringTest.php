@@ -28,6 +28,8 @@ final class HexStringTest extends EthTypeTest
         $this->assertEquals($this->instance->value(), 'test');
     }
 
+    #region TypingTest Members
+
     /**
      * {@inheritdoc}
      */
@@ -43,4 +45,6 @@ final class HexStringTest extends EthTypeTest
     {
         return '0x74657374';  # test
     }
+
+    #endregion
 }

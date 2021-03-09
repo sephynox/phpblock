@@ -48,8 +48,14 @@
     },
     "scripts": {
         "tests": [
-            "./vendor/bin/phpunit tests",
+            "./vendor/bin/phpunit tests"
+        ],
+        "bench": [
             "./vendor/bin/phpbench run tests/ --report=default"
+        ],
+        "check": [
+            "@tests",
+            "@bench"
         ]
     },
     "extra": {

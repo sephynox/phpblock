@@ -1,7 +1,7 @@
 <?php
 
 /**
- * JSON RPC Request Interface.
+ * Network Base.
  *
  * @package PHPBlock
  * @category Network

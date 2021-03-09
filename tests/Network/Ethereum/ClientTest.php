@@ -42,5 +42,13 @@ final class ClientTest extends TestCase
     public function testProtocolVersionCall(): void
     {
         $this->assertTrue(true);
+
+        $this->client->protocolVersion()
+            ->then(function (string $version) {
+                var_dump("Run5");
+                var_dump($version);
+            });
+
+        $this->client->run();
     }
 }

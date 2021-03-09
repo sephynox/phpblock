@@ -13,7 +13,7 @@
 namespace PHPBlock\Helper;
 
 /**
- * Convert a bytea array to a hex string.
+ * Convert a byte array to a hex string.
  *
  * @param array $bytes
  *
@@ -22,6 +22,18 @@ namespace PHPBlock\Helper;
 function byteToHex(array $bytes): string
 {
     return bin2hex(join(array_map('chr', $bytes)));
+}
+
+/**
+ * Convert a hex string to a string.
+ *
+ * @param string $hex
+ *
+ * @return string
+ */
+function hexToStr(string $hex): string
+{
+    return hex2bin($hex);
 }
 
 /**

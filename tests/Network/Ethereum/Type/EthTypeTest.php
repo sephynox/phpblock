@@ -31,18 +31,4 @@ abstract class EthTypeTest extends TypingTest
     {
         $this->assertEquals($this->value, $this->instance->toEth());
     }
-
-    /**
-     * Get the type class.
-     *
-     * @return string
-     */
-    abstract protected function getType(): string;
-
-    /**
-     * Get the type value to test.
-     *
-     * @return mixed
-     */
-    abstract protected function getValue();
 }

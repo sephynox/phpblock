@@ -17,6 +17,8 @@ use PHPBlock\Network\Ethereum\Type\HexAddress;
 
 final class HexAddressTest extends EthTypeTest
 {
+    #region TypingTest Members
+
     /**
      * {@inheritdoc}
      */
@@ -32,4 +34,6 @@ final class HexAddressTest extends EthTypeTest
     {
         return '0x36273803306a3c22bc848f8db761e974697ece0d';
     }
+
+    #endregion
 }

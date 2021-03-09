@@ -28,6 +28,8 @@ final class BlockNumberTest extends EthTypeTest
         $this->assertEquals($this->instance->value(), 8149882);
     }
 
+    #region TypingTest Members
+
     /**
      * {@inheritdoc}
      */
@@ -43,4 +45,6 @@ final class BlockNumberTest extends EthTypeTest
     {
         return '0x7c5b7a';  # 8149882
     }
+
+    #endregion
 }

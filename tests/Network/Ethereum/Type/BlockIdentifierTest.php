@@ -17,6 +17,8 @@ use PHPBlock\Network\Ethereum\Type\BlockIdentifier;
 
 final class BlockIdentifierTest extends EthTypeTest
 {
+    #region TypingTest Members
+
     /**
      * {@inheritdoc}
      */
@@ -32,4 +34,6 @@ final class BlockIdentifierTest extends EthTypeTest
     {
         return '0xba6c9192229ef4fc8615b510abd2c602f3805b1e51ff8892fb0964e1988ba1e2';
     }
+
+    #endregion
 }

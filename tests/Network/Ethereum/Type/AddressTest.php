@@ -17,6 +17,8 @@ use PHPBlock\Network\Ethereum\Type\Address;
 
 final class AddressTest extends EthTypeTest
 {
+    #region TypingTest Members
+
     /**
      * {@inheritdoc}
      */
@@ -32,4 +34,6 @@ final class AddressTest extends EthTypeTest
     {
         return strtolower('0xdbF03B407c01E7cD3CBea99509d93f8DDDC8C6FB');
     }
+
+    #endregion
 }
