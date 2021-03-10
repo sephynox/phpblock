@@ -12,6 +12,7 @@
 
 namespace PHPBlock\Network\Ethereum;
 
+use DateTime;
 use Psr\Http\Message\ResponseInterface;
 use React\Promise\Promise;
 use PHPBlock\JSONRPC\RPCExceptionInterface;
@@ -20,12 +21,22 @@ use PHPBlock\JSONRPC\RequestInterface;
 use PHPBlock\JSONRPC\RPCFactoryInterface;
 use PHPBlock\Network\Base;
 use PHPBlock\Network\Ethereum\Model\Block;
-use PHPBlock\Network\Ethereum\Model\EthModel;
+use PHPBlock\Network\Ethereum\Model\SyncStatus;
+use PHPBlock\Network\Ethereum\Type\Address;
+use PHPBlock\Network\Ethereum\Type\BlockIdentifier;
+use PHPBlock\Network\Ethereum\Type\BlockNumber;
+use PHPBlock\Network\Ethereum\Type\ChecksumAddress;
 use PHPBlock\Network\Ethereum\Type\Hash32;
+use PHPBlock\Network\Ethereum\Type\HexAddress;
+use PHPBlock\Network\Ethereum\Type\HexString;
+
+use function PHPBlock\Helper\hexToInt;
+use function PHPBlock\Helper\hexToStr;
 
 class Client extends Base
 {
     public const DEFAULT_ENDPOINT = 'http://127.0.0.1:8545';
+    public static $dataMap;
 
     /**
      * A new Ethereum client instance.
@@ -34,6 +45,24 @@ class Client extends Base
      */
     public function __construct(string $uri = '')
     {
+        if (!isset(static::$dataMap)) {
+            static::$dataMap = [
+                \bool::class => fn ($v) => (bool) $v,
+                \int::class => fn ($v) => hexToInt($v),
+                \string::class => fn ($v) => hexToStr($v),
+                Address::class => fn ($v) => new Address($v),
+                HexAddress::class => fn ($v) => new HexAddress($v),
+                ChecksumAddress::class => fn ($v) => new ChecksumAddress($v),
+                DateTime::class => fn ($v) => (new DateTime())->setTimestamp(hexToInt($v)),
+                SyncStatus::class => fn ($v) => is_bool($v) ? (bool) $v : new SyncStatus($v),
+                BlockIdentifier::class => fn ($v) => new BlockIdentifier($v),
+                BlockNumber::class => fn ($v) => new BlockNumber($v),
+                HexString::class => fn ($v) => new HexString($v),
+                Hash32::class => fn ($v) => new Hash32($v),
+                Block::class => fn ($v) => new Block($v)
+            ];
+        }
+
         parent::__construct(new Factory($uri ?: static::DEFAULT_ENDPOINT));
     }
 
@@ -71,9 +100,30 @@ class Client extends Base
      */
     public function protocolVersion(): Promise
     {
-        return $this->callEndpoint('eth_protocolVersion', 67, string::class);
+        return $this->callEndpoint('eth_protocolVersion', 67, \string::class);
     }
 
+    /**
+     * Returns an object with data about the sync status or false.
+     * @see https://eth.wiki/json-rpc/API#eth_syncing
+     *
+     * @return Promise<SyncStatus|false> Returns a SynStatus object or false.
+     */
+    public function syncing(): Promise
+    {
+        return $this->callEndpoint('eth_syncing', 1, SyncStatus::class);
+    }
+
+    /**
+     * Returns the client coinbase address.
+     * @see https://eth.wiki/json-rpc/API#eth_coinbase
+     *
+     * @return Promise<HexAddress> The current coinbase address.
+     */
+    public function coinbase(): Promise
+    {
+        return $this->callEndpoint('eth_coinbase', 64, HexAddress::class);
+    }
 
     /**
      * Returns information about a block by hash.
@@ -130,8 +180,8 @@ class Client extends Base
                 $data = $resp->getRPCResult();
 
                 if ($error === null) {
-                    if (isset(EthModel::$dataMap[$class])) {
-                        return EthModel::$dataMap[$class]($data);
+                    if (isset(Client::$dataMap[$class])) {
+                        return Client::$dataMap[$class]($data);
                     }
 
                     return $data;

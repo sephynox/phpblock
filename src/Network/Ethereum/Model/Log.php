@@ -12,6 +12,7 @@
 
 namespace PHPBlock\Network\Ethereum\Model;
 
+use PHPBlock\Network\Ethereum\Client;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
@@ -52,13 +53,13 @@ class Log extends EthModel
     {
         if (!isset(static::$map)) {
             static::$map = [
-                'logIndex' => EthModel::$dataMap[int::class],
-                'transactionIndex' => EthModel::$dataMap[int::class],
-                'transactionHash' => EthModel::$dataMap[Hash32::class],
-                'blockHash' => EthModel::$dataMap[Hash32::class],
-                'blockNumber' => EthModel::$dataMap[int::class],
-                'address' => EthModel::$dataMap[HexAddress::class],
-                'data' => EthModel::$dataMap[HexString::class]
+                'logIndex' => Client::$dataMap[\int::class],
+                'transactionIndex' => Client::$dataMap[\int::class],
+                'transactionHash' => Client::$dataMap[Hash32::class],
+                'blockHash' => Client::$dataMap[Hash32::class],
+                'blockNumber' => Client::$dataMap[\int::class],
+                'address' => Client::$dataMap[HexAddress::class],
+                'data' => Client::$dataMap[HexString::class]
             ];
         }
 

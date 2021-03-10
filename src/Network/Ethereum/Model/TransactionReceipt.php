@@ -12,6 +12,7 @@
 
 namespace PHPBlock\Network\Ethereum\Model;
 
+use PHPBlock\Network\Ethereum\Client;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 
@@ -52,16 +53,16 @@ class TransactionReceipt extends EthModel
     {
         if (!isset(static::$map)) {
             static::$map = [
-                'transactionHash' => EthModel::$dataMap[Hash32::class],
-                'transactionIndex' => EthModel::$dataMap[int::class],
-                'blockHash' => EthModel::$dataMap[Hash32::class],
-                'blockNumber' => EthModel::$dataMap[int::class],
-                'from' => EthModel::$dataMap[HexAddress::class],
-                'to' => EthModel::$dataMap[HexAddress::class],
-                'cumulativeGasUsed' => EthModel::$dataMap[int::class],
-                'gasUsed' => EthModel::$dataMap[int::class],
-                'contractAddress' => EthModel::$dataMap[HexAddress::class],
-                'logsBloom' => EthModel::$dataMap[int::class]
+                'transactionHash' => Client::$dataMap[Hash32::class],
+                'transactionIndex' => Client::$dataMap[\int::class],
+                'blockHash' => Client::$dataMap[Hash32::class],
+                'blockNumber' => Client::$dataMap[\int::class],
+                'from' => Client::$dataMap[HexAddress::class],
+                'to' => Client::$dataMap[HexAddress::class],
+                'cumulativeGasUsed' => Client::$dataMap[int::class],
+                'gasUsed' => Client::$dataMap[\int::class],
+                'contractAddress' => Client::$dataMap[HexAddress::class],
+                'logsBloom' => Client::$dataMap[\int::class]
             ];
         }
 

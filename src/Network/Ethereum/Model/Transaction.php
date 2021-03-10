@@ -12,6 +12,7 @@
 
 namespace PHPBlock\Network\Ethereum\Model;
 
+use PHPBlock\Network\Ethereum\Client;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
@@ -44,19 +45,19 @@ class Transaction extends EthModel
     {
         if (!isset(static::$map)) {
             static::$map = [
-                'blockNumber' => EthModel::$dataMap[int::class],
-                'blockHash' => EthModel::$dataMap[Hash32::class],
-                'from' => EthModel::$dataMap[HexAddress::class],
-                'gas' => EthModel::$dataMap[int::class],
-                'gasPrice' => EthModel::$dataMap[int::class],
-                'input' => EthModel::$dataMap[Hash32::class],
-                'none' => EthModel::$dataMap[HexString::class],
-                'to' => EthModel::$dataMap[int::class],
-                'transactionIndex' => EthModel::$dataMap[HexAddress::class],
-                'value' => EthModel::$dataMap[int::class],
-                'v' => EthModel::$dataMap[int::class],
-                'r' => EthModel::$dataMap[int::class],
-                's' => EthModel::$dataMap[Hash32::class]
+                'blockNumber' => Client::$dataMap[\int::class],
+                'blockHash' => Client::$dataMap[Hash32::class],
+                'from' => Client::$dataMap[HexAddress::class],
+                'gas' => Client::$dataMap[\int::class],
+                'gasPrice' => Client::$dataMap[\int::class],
+                'input' => Client::$dataMap[Hash32::class],
+                'none' => Client::$dataMap[HexString::class],
+                'to' => Client::$dataMap[\int::class],
+                'transactionIndex' => Client::$dataMap[HexAddress::class],
+                'value' => Client::$dataMap[\int::class],
+                'v' => Client::$dataMap[\int::class],
+                'r' => Client::$dataMap[\int::class],
+                's' => Client::$dataMap[Hash32::class]
             ];
         }
 

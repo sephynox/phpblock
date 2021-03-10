@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use PHPBlock\Network\Ethereum\Client;
+use PHPBlock\Network\Ethereum\Model\SyncStatus;
+use PHPBlock\Network\Ethereum\Type\HexAddress;
 
 final class ClientTest extends TestCase
 {
@@ -44,11 +46,47 @@ final class ClientTest extends TestCase
         $ver = null;
 
         $this->client->protocolVersion()
-            ->then(function (string $version) use (&$ran, &$ver) {
+            ->then(function (string $version) use (&$ver) {
                 $ver = $version;
             });
 
         $this->client->run();
         $this->assertNotNull($ver);
+    }
+
+    /**
+     * Test eth_syncing call.
+     *
+     * @return void
+     */
+    public function testSyncingCall(): void
+    {
+        $stat = null;
+
+        $this->client->syncing()
+            ->then(function ($status) use (&$stat) {
+                $stat = $status;
+            });
+
+        $this->client->run();
+        $this->assertTrue($stat instanceof SyncStatus || is_bool($stat));
+    }
+
+    /**
+     * Test eth_coinbase call.
+     *
+     * @return void
+     */
+    public function testCoinbaseCall(): void
+    {
+        $addr = null;
+
+        $this->client->coinbase()
+            ->then(function ($address) use (&$addr) {
+                $addr = $address;
+            });
+
+        $this->client->run();
+        $this->assertInstanceOf(HexAddress::class, $addr);
     }
 }

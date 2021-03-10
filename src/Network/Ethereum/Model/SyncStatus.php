@@ -12,6 +12,8 @@
 
 namespace PHPBlock\Network\Ethereum\Model;
 
+use PHPBlock\Network\Ethereum\Client;
+
 class SyncStatus extends EthModel
 {
     public int $startingBlock;
@@ -29,9 +31,9 @@ class SyncStatus extends EthModel
     {
         if (!isset(static::$map)) {
             static::$map = [
-                'startingBlock' => EthModel::$dataMap[int::class],
-                'currentBlock' => EthModel::$dataMap[int::class],
-                'highestBlock' => EthModel::$dataMap[int::class]
+                'startingBlock' => Client::$dataMap[\int::class],
+                'currentBlock' => Client::$dataMap[\int::class],
+                'highestBlock' => Client::$dataMap[\int::class]
             ];
         }
 

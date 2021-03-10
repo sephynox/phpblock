@@ -13,6 +13,7 @@
 namespace PHPBlock\Network\Ethereum\Model;
 
 use DateTime;
+use PHPBlock\Network\Ethereum\Client;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
@@ -82,23 +83,23 @@ class Block extends EthModel
     {
         if (!isset(static::$map)) {
             static::$map = [
-                'number' => EthModel::$dataMap[int::class],
-                'hash' => EthModel::$dataMap[Hash32::class],
-                'parentHash' => EthModel::$dataMap[Hash32::class],
-                'nonce' => EthModel::$dataMap[int::class],
-                'sha3Uncles' => EthModel::$dataMap[Hash32::class],
-                'logsBloom' => EthModel::$dataMap[int::class],
-                'transactionsRoot' => EthModel::$dataMap[Hash32::class],
-                'stateRoot' => EthModel::$dataMap[Hash32::class],
-                'receiptsRoot' => EthModel::$dataMap[Hash32::class],
-                'miner' => EthModel::$dataMap[HexAddress::class],
-                'difficulty' => EthModel::$dataMap[int::class],
-                'totalDifficulty' => EthModel::$dataMap[int::class],
-                'extraData' => EthModel::$dataMap[HexString::class],
-                'size' => EthModel::$dataMap[int::class],
-                'gasLimit' => EthModel::$dataMap[int::class],
-                'gasUsed' => EthModel::$dataMap[int::class],
-                'timestamp' => EthModel::$dataMap[DateTime::class]
+                'number' => Client::$dataMap[\int::class],
+                'hash' => Client::$dataMap[Hash32::class],
+                'parentHash' => Client::$dataMap[Hash32::class],
+                'nonce' => Client::$dataMap[\int::class],
+                'sha3Uncles' => Client::$dataMap[Hash32::class],
+                'logsBloom' => Client::$dataMap[\int::class],
+                'transactionsRoot' => Client::$dataMap[Hash32::class],
+                'stateRoot' => Client::$dataMap[Hash32::class],
+                'receiptsRoot' => Client::$dataMap[Hash32::class],
+                'miner' => Client::$dataMap[HexAddress::class],
+                'difficulty' => Client::$dataMap[\int::class],
+                'totalDifficulty' => Client::$dataMap[\int::class],
+                'extraData' => Client::$dataMap[HexString::class],
+                'size' => Client::$dataMap[\int::class],
+                'gasLimit' => Client::$dataMap[\int::class],
+                'gasUsed' => Client::$dataMap[\int::class],
+                'timestamp' => Client::$dataMap[DateTime::class]
             ];
         }
 

@@ -13,6 +13,7 @@
 namespace PHPBlock\Network\Ethereum\Model;
 
 use DateTime;
+use PHPBlock\Network\Ethereum\Client;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
@@ -52,14 +53,14 @@ class Message extends EthModel
     {
         if (!isset(static::$map)) {
             static::$map = [
-                'hash' => EthModel::$dataMap[Hash32::class],
-                'from' => EthModel::$dataMap[HexAddress::class],
-                'to' => EthModel::$dataMap[HexAddress::class],
-                'expiry' => EthModel::$dataMap[DateTime::class],
-                'ttl' => EthModel::$dataMap[int::class],
-                'sent' => EthModel::$dataMap[int::class],
-                'payload' => EthModel::$dataMap[HexString::class],
-                'workProved' => EthModel::$dataMap[int::class]
+                'hash' => Client::$dataMap[Hash32::class],
+                'from' => Client::$dataMap[HexAddress::class],
+                'to' => Client::$dataMap[HexAddress::class],
+                'expiry' => Client::$dataMap[DateTime::class],
+                'ttl' => Client::$dataMap[\int::class],
+                'sent' => Client::$dataMap[\int::class],
+                'payload' => Client::$dataMap[HexString::class],
+                'workProved' => Client::$dataMap[\int::class]
             ];
         }
 
