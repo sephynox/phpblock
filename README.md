@@ -1,9 +1,20 @@
 # PHPBlock
-A lightweight asynchronous PHP server/client for blockchain networks. 
-Currently in development. Not all endpoints are available. Help welcome!
-
-## Build Status
 [![PHP Composer](https://github.com/sephynox/phpblock/actions/workflows/php.yml/badge.svg?branch=main)](https://github.com/sephynox/phpblock/actions/workflows/php.yml)
+\
+A lightweight asynchronous `PHP` server/client for blockchain networks. 
+Currently in development. Not all endpoints are available. Help welcome!
+\
+Table of Contents
+  - [Supported Platforms](#supported-platforms)
+    - [Future Platforms](#future-platforms)
+  - [Documentation](#documentation)
+    - [Quick start Example](#quick-start-example)
+    - [Install](#install)
+    - [Testing](#testing)
+  - [License](#license)
+  - [Donate](#donate)
+
+TODO
 
 ## Supported Platforms
 
@@ -12,16 +23,7 @@ Currently in development. Not all endpoints are available. Help welcome!
 ### Future Platforms
 
 * Cardano
-
-## Documentation
-
-* [Quickstart Example](#quickstart-example)
-* [Install](#install)
-* [Testing](#Testing)
-* [License](#License)
-  
-TODO
-### Quickstart Example
+### Quick Start Example
 Call the Ethereum `eth_protocolversion` endpoint.
 ```php
 <?php
@@ -80,3 +82,12 @@ $ composer run-script check
 ## License
 
 MIT, see [LICENSE file](LICENSE).
+
+## Donate
+**BTC**: bc1qkqsfuaptqcslwmxh5lz2utxls4pe7wnjhepa2s
+
+**ETH**: 0x00E069d105F61564530859A35FE0D007C3536a35
+
+**ADA**: addr1qywvljkfnyyey38te86tshjscn6yw25c069lf82jfjgv57m3txy8f0nf4wnjwcr8uxmlg9wk7lt6uu7g5w9x077v8lwqgsulw6
+
+**DOGE**: D949UWaLauvKyhX6PNuXGavmMNS6uFcjfS
