@@ -19,12 +19,12 @@ use PHPBlock\Network\Ethereum\Type\HexString;
 
 class Block extends EthModel
 {
-    public int $number = null;
-    public Hash32 $hash = null;
+    public ?int $number;
+    public ?Hash32 $hash;
     public Hash32 $parentHash;
-    public int $nonce = null;
+    public ?int $nonce;
     public Hash32 $sha3Uncles;
-    public int $logsBloom = null;  #TODO
+    public ?int $logsBloom;  #TODO
     public Hash32 $transactionsRoot;
     public Hash32 $stateRoot;
     public Hash32 $receiptsRoot;
@@ -50,7 +50,14 @@ class Block extends EthModel
      */
     public function mutateTransactions(array $data): array
     {
-        return [];  # TODO
+        foreach ($data as &$v) {
+            if (is_array($v)) {
+                $v = new Transaction($v);
+            } else {
+                $v = new Hash32($v);
+            }
+        }
+        return $data;
     }
 
     /**
@@ -62,7 +69,7 @@ class Block extends EthModel
      */
     public function mutateUncles(array $data): array
     {
-        return [];  # TODO
+        return array_map(fn ($v) => new Hash32($v), $data);
     }
 
     #region BaseModel Members

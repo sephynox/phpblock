@@ -38,7 +38,7 @@ abstract class EthModel extends BaseModel
                 Address::class => fn ($v) => new Address($v),
                 HexAddress::class => fn ($v) => new HexAddress($v),
                 ChecksumAddress::class => fn ($v) => new ChecksumAddress($v),
-                DateTime::class => fn ($v) => (new DateTime())->setTimestamp($v),
+                DateTime::class => fn ($v) => (new DateTime())->setTimestamp(hexToInt($v)),
                 BlockIdentifier::class => fn ($v) => new BlockIdentifier($v),
                 BlockNumber::class => fn ($v) => new BlockNumber($v),
                 SyncStatus::class => fn ($v) => new SyncStatus($v),

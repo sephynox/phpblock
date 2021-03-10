@@ -20,11 +20,11 @@ class Log extends EthModel
 {
     /** @var int|bool */
     public $removed;
-    public int $logIndex = null;
-    public int $transactionIndex = null;
-    public Hash32 $transactionHash = null;
-    public Hash32 $blockHash = null;
-    public int $blockNumber = null;
+    public ?int $logIndex;
+    public ?int $transactionIndex;
+    public ?Hash32 $transactionHash;
+    public ?Hash32 $blockHash;
+    public ?int $blockNumber;
     public HexAddress $address;
     public HexString $data;  # TODO
     public array $topics;

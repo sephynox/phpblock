@@ -18,16 +18,16 @@ use PHPBlock\Network\Ethereum\Type\HexString;
 
 class Transaction extends EthModel
 {
-    public int $blockNumber = null;
-    public Hash32 $blockHash = null;
+    public ?int $blockNumber;
+    public ?Hash32 $blockHash;
     public HexAddress $from;
     public int $gas;
     public int $gasPrice;
     public Hash32 $hash;
     public HexString $input;
     public int $none;
-    public HexAddress $to = null;
-    public int $transactionIndex = null;
+    public ?HexAddress $to;
+    public ?int $transactionIndex;
     public int $value;
     public int $v;
     public Hash32 $r;

@@ -25,7 +25,7 @@ class TransactionReceipt extends EthModel
     public HexAddress $to;
     public int $cumulativeGasUsed;
     public int $gasUsed;
-    public HexAddress $contractAddress;
+    public ?HexAddress $contractAddress;
     public array $logs;
     public int $logsBloom;  #TODO
 

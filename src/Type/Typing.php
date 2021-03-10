@@ -20,7 +20,7 @@ abstract class Typing
 
     public function __construct($value)
     {
-        $this->val = $this->unpack($value);
+        $this->val = $this->unpack(trim($value));
     }
 
     public function __toString()
