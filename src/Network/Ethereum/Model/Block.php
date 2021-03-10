@@ -24,7 +24,7 @@ class Block extends EthModel
     public Hash32 $parentHash;
     public ?int $nonce;
     public Hash32 $sha3Uncles;
-    public ?int $logsBloom;  #TODO
+    public ?int $logsBloom;
     public Hash32 $transactionsRoot;
     public Hash32 $stateRoot;
     public Hash32 $receiptsRoot;
@@ -36,6 +36,7 @@ class Block extends EthModel
     public int $gasLimit;
     public int $gasUsed;
     public DateTime $timestamp;
+    /** @var array[string|Transaction] */
     public array $transactions;
     public array $uncles;
 

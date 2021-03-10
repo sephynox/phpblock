@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Type Test.
+ * Model Test.
  *
  * @package PHPBlock
  * @category Test

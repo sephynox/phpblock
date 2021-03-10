@@ -27,6 +27,9 @@
         "react/promise": "^2.8",
         "kornrunner/keccak": "^1.1"
     },
+    "suggest": {
+        "ext-bcmath": "Needed to support Gwei conversions."
+    },
     "autoload": {
         "psr-4": {
             "PHPBlock\\": "src/"
