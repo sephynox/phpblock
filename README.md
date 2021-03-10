@@ -1,10 +1,12 @@
 # PHPBlock
+A lightweight asynchronous `PHP` server/client for blockchain networks.
+
 [![PHP Composer](https://github.com/sephynox/phpblock/actions/workflows/php.yml/badge.svg?branch=main)](https://github.com/sephynox/phpblock/actions/workflows/php.yml)
-\
-A lightweight asynchronous `PHP` server/client for blockchain networks. 
-Currently in development. Not all endpoints are available. Help welcome!
-\
+
+> Currently in development. Not all endpoints are available. Help welcome!
+
 Table of Contents
+-----------------
   - [Supported Platforms](#supported-platforms)
     - [Future Platforms](#future-platforms)
   - [Documentation](#documentation)
