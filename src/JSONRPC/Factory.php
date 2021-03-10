@@ -12,6 +12,7 @@
 
 namespace PHPBlock\JSONRPC;
 
+use Psr\Http\Message\ResponseInterface as HttpResponseInterface;
 use PHPBlock\JSONRPC\Request;
 use PHPBlock\JSONRPC\Response;
 use PHPBlock\JSONRPC\RequestInterface;
@@ -36,6 +37,8 @@ class Factory implements RPCFactoryInterface
         $this->version = $version;
     }
 
+    #region RPCFactoryInterface Members
+
     /**
      * {@inheritdoc}
      */
@@ -59,6 +62,21 @@ class Factory implements RPCFactoryInterface
     ): ResponseInterface {
         return new Response($status, $headers, $body);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function makeFromResponse(
+        HttpResponseInterface $response
+    ): ResponseInterface {
+        return $this->makeResponse(
+            $response->getStatusCode(),
+            $response->getBody(),
+            $response->getHeaders()
+        );
+    }
+
+    #endregion
 
     /**
      * Create RPC Json Body.

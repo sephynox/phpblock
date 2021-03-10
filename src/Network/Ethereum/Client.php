@@ -12,11 +12,12 @@
 
 namespace PHPBlock\Network\Ethereum;
 
+use Psr\Http\Message\ResponseInterface;
 use React\Promise\Promise;
 use PHPBlock\JSONRPC\RPCExceptionInterface;
 use PHPBlock\JSONRPC\Factory;
 use PHPBlock\JSONRPC\RequestInterface;
-use PHPBlock\JSONRPC\ResponseInterface;
+use PHPBlock\JSONRPC\RPCFactoryInterface;
 use PHPBlock\Network\Base;
 use PHPBlock\Network\Ethereum\Model\Block;
 use PHPBlock\Network\Ethereum\Model\EthModel;
@@ -27,6 +28,14 @@ class Client extends Base
     public function __construct(string $uri)
     {
         parent::__construct(new Factory($uri));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function factory(): RPCFactoryInterface
+    {
+        return parent::factory();
     }
 
     /**
@@ -55,7 +64,6 @@ class Client extends Base
      */
     public function protocolVersion(): Promise
     {
-        var_dump("Run2");
         return $this->callEndpoint('eth_protocolVersion', 67, string::class);
     }
 
@@ -108,27 +116,22 @@ class Client extends Base
      */
     public function getResult(RequestInterface $request, string $class): Promise
     {
-        var_dump("Run3");
         return $this->send($request)
             ->then(function (ResponseInterface $resp) use ($class) {
-                var_dump("Run4");
+                $resp = $this->factory()->makeFromResponse($resp);
                 $error = $resp->getRPCError();
                 $data = $resp->getRPCResult();
 
-                if ($error !== null) {
-                    var_dump("Run4.1");
+                if ($error === null) {
                     if (isset(EthModel::$dataMap[$class])) {
                         return EthModel::$dataMap[$class]($data);
                     }
 
                     return $data;
                 } else {
-                    var_dump("Run4.2");
                     throw $error;
                 }
             }, function (\Exception $exception) {
-                var_dump("Run4.3");
-                var_dump($exception->getMessage());
                 throw $exception;
             });
     }

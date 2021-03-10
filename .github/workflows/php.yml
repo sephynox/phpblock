@@ -13,6 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10'
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
@@ -26,6 +29,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-php-
 
+    - name: Setup ganache-cli
+      run: npm install -g ganache-cli
+
     - name: Install dependencies
       run: composer install --no-progress  
 
@@ -34,6 +40,7 @@ jobs:
 
     - name: Run test suite
       run: |
+        ganache-cli &
         composer run-script tests
 
         

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Etherem Client Test.
+ * Ethereum Client Test.
  *
  * @package PHPBlock
  * @category Test
@@ -35,20 +35,20 @@ final class ClientTest extends TestCase
     }
 
     /**
-     * eth_protocolVersion
+     * Test eth_protocolVersion call.
      *
      * @return void
      */
     public function testProtocolVersionCall(): void
     {
-        $this->assertTrue(true);
+        $ver = null;
 
         $this->client->protocolVersion()
-            ->then(function (string $version) {
-                var_dump("Run5");
-                var_dump($version);
+            ->then(function (string $version) use (&$ran, &$ver) {
+                $ver = $version;
             });
 
         $this->client->run();
+        $this->assertNotNull($ver);
     }
 }

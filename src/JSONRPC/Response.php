@@ -56,6 +56,8 @@ class Response extends HttpResponse implements ResponseInterface
                 $this->responseData["error"]["data"]
             );
         }
+
+        return null;
     }
     /**
      * {@inheritdoc}

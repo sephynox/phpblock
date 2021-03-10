@@ -5,7 +5,7 @@
         </testsuite>
     </testsuites>
     <php>
-        <env name="ETH_TEST_CLIENT" value="https://api.random.org/json-rpc/1/invoke" force="true" />
+        <env name="ETH_TEST_CLIENT" value="http://127.0.0.1:8545" force="true" />
         <env name="ETH_TEST_ADDRESS" value="0xfd6c50fc0e6de9d219c9f3481fda194c23748f66" force="true" />
         <env name="ETH_CHECKSUM_ADDRESS" value="0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359" force="true" />
         <env name="ETH_BLOCK_HEIGHT" value="12007329" force="true" />

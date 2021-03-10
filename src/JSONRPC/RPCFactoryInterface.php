@@ -12,6 +12,7 @@
 
 namespace PHPBlock\JSONRPC;
 
+use Psr\Http\Message\ResponseInterface as HttpResponseInterface;
 use PHPBlock\Network\FactoryInterface;
 use PHPBlock\JSONRPC\RequestInterface;
 use PHPBlock\JSONRPC\ResponseInterface;
@@ -48,5 +49,16 @@ interface RPCFactoryInterface extends FactoryInterface
         int $status,
         string $body = '',
         array $headers = []
+    ): ResponseInterface;
+
+    /**
+     * Create a JSON RPC Response from a PSR-7 Response.
+     *
+     * @param HttpResponseInterface $response
+     *
+     * @return ResponseInterface
+     */
+    public function makeFromResponse(
+        HttpResponseInterface $response
     ): ResponseInterface;
 }
