@@ -25,9 +25,16 @@ use PHPBlock\Network\Ethereum\Type\Hash32;
 
 class Client extends Base
 {
-    public function __construct(string $uri)
+    public const DEFAULT_ENDPOINT = 'http://127.0.0.1:8545';
+
+    /**
+     * A new Ethereum client instance.
+     *
+     * @param string $uri
+     */
+    public function __construct(string $uri = '')
     {
-        parent::__construct(new Factory($uri));
+        parent::__construct(new Factory($uri ?: static::DEFAULT_ENDPOINT));
     }
 
     /**
