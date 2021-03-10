@@ -1,8 +1,8 @@
 {
-    "name": "sephynox/phpblock",
+    "name": "phpblock/core",
     "type": "library",
-    "description": "A lightweight PHP RPC client for blockchain networks.",
-    "keywords": ["php", "ethereum", "rpc", "blockchain"],
+    "description": "A lightweight asynchronous PHP server/client for blockchain networks.",
+    "keywords": ["php", "async", "ethereum", "rpc", "blockchain"],
     "homepage": "https://github.com/sephynox/phpblock",
     "license": "MIT",
     "authors": [{
