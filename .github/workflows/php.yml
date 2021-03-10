@@ -41,6 +41,7 @@ jobs:
     - name: Run test suite
       run: |
         ganache-cli &
+        sleep 5
         composer run-script tests
 
         
