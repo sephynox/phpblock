@@ -44,7 +44,7 @@ $Ethereum->run();
 ## Install
 Get started quickly [using Composer](https://getcomposer.org).
 ```
-$ composer require sephynox/phpblock
+$ composer require phpblock/core
 ```
 ## Testing
 
