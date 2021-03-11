@@ -18,9 +18,13 @@ abstract class Typing
 {
     private $val;
 
-    public function __construct($value)
+    public function __construct($value, bool $raw = false)
     {
-        $this->val = $this->unpack(trim($value));
+        if (!$raw) {
+            $this->val = $this->unpack(trim($value));
+        } else {
+            $this->val = $value;
+        }
     }
 
     public function __toString()

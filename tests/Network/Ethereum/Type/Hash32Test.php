@@ -13,10 +13,29 @@
 declare(strict_types=1);
 require_once 'EthTypeTest.php';
 
+use kornrunner\Keccak;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 
 final class Hash32Test extends EthTypeTest
 {
+    /**
+     * Benchmark the Hash32 string to hash functionality.
+     * @Revs(1000)
+     */
+    public function benchHash32String(): void
+    {
+        $hash32 = new Hash32("Hello World!");
+    }
+
+    /**
+     * Benchmark the Hash32 string to hash functionality.
+     * @Revs(1000)
+     */
+    public function benchKeccak(): void
+    {
+        $expect = "0x" . Keccak::hash("Hello World!", 256);
+    }
+
     #region TypingTest Members
 
     /**

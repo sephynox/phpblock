@@ -23,9 +23,18 @@ class Gwei extends EthModel
      *
      * @param string $value
      */
-    public function __construct(string $value)
+    public function __construct(string $value, bool $wei = false)
     {
-        $this->value = $value;
+        if ($wei) {
+            $this->value = static::weiToGwei($value);
+        } else {
+            $this->value = $value;
+        }
+    }
+
+    public function __toString()
+    {
+        return $this->value;
     }
 
     /**
@@ -35,7 +44,7 @@ class Gwei extends EthModel
      *
      * @return string
      */
-    public static function toGwei(string $value): string
+    public static function ethToGwei(string $value): string
     {
         return bcdiv($value, static::$ether);
     }
@@ -47,9 +56,21 @@ class Gwei extends EthModel
      *
      * @return string
      */
-    public static function toEther(string $value): string
+    public static function gweiToEth(string $value): string
     {
         return rtrim(bcmul($value, static::$ether, 18), '0');
+    }
+
+    /**
+     * Convert wei to gwei.
+     *
+     * @param string $value
+     *
+     * @return string
+     */
+    public static function weiToGwei(string $value): string
+    {
+        return bcdiv($value, static::$wei);
     }
 
     /**
@@ -79,7 +100,7 @@ class Gwei extends EthModel
      */
     public function toEth(): string
     {
-        return static::toEther($this->value);
+        return static::gweiToEth($this->value);
     }
 
     #region BaseModel Members

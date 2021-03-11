@@ -12,6 +12,7 @@
 
 namespace PHPBlock\Network\Ethereum\Type;
 
+use kornrunner\Keccak;
 use PHPBlock\Network\Ethereum\Exception\HashException;
 
 use function PHPBlock\Helper\byteToHex;
@@ -28,6 +29,10 @@ class Hash32 extends EthType
     {
         if (is_array($value)) {
             return $value;
+        }
+
+        if (!ctype_xdigit($this->stripPrefix($value))) {
+            $value = Keccak::hash($value, 256);
         }
 
         $strValue = strtolower($this->stripPrefix($value));

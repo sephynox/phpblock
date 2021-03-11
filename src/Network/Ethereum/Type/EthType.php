@@ -16,8 +16,6 @@ use kornrunner\Keccak;
 use PHPBlock\Type\Typing;
 use Exception;
 
-use function PHPBlock\Helper\hexToInt;
-
 abstract class EthType extends Typing
 {
     public const HEX_PREFIX = '0x';
@@ -76,7 +74,7 @@ abstract class EthType extends Typing
             if (false !== strpos(EthType::HEX_INTS, $v)) {
                 $strReturn .= $v;
             } elseif (false !== stripos(EthType::HEX_CHARS, $v)) {
-                $n = hexToInt($strHashed[$i]);
+                $n = hexdec($strHashed[$i]);
 
                 if ($n > 7) {
                     $strReturn .= strtoupper($v);

@@ -21,6 +21,7 @@ use PHPBlock\JSONRPC\RequestInterface;
 use PHPBlock\JSONRPC\RPCFactoryInterface;
 use PHPBlock\Network\Base;
 use PHPBlock\Network\Ethereum\Model\Block;
+use PHPBlock\Network\Ethereum\Model\Gwei;
 use PHPBlock\Network\Ethereum\Model\SyncStatus;
 use PHPBlock\Network\Ethereum\Type\Address;
 use PHPBlock\Network\Ethereum\Type\BlockIdentifier;
@@ -31,7 +32,6 @@ use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
 
 use function PHPBlock\Helper\hexToInt;
-use function PHPBlock\Helper\hexToStr;
 
 class Client extends Base
 {
@@ -54,6 +54,7 @@ class Client extends Base
                 HexAddress::class => fn ($v) => new HexAddress($v),
                 ChecksumAddress::class => fn ($v) => new ChecksumAddress($v),
                 DateTime::class => fn ($v) => (new DateTime())->setTimestamp(hexToInt($v)),
+                Gwei::class => fn ($v) => function_exists('bcdiv') ? new Gwei(hexToInt($v), true) : (int) $v,
                 SyncStatus::class => fn ($v) => is_bool($v) ? (bool) $v : new SyncStatus($v),
                 BlockIdentifier::class => fn ($v) => new BlockIdentifier($v),
                 BlockNumber::class => fn ($v) => new BlockNumber($v),
@@ -75,6 +76,30 @@ class Client extends Base
     }
 
     /**
+     * Returns the current client version.
+     * @see https://eth.wiki/json-rpc/API#web3_clientVersion
+     *
+     * @return Promise<string> The current client version.
+     */
+    public function web3ClientVersion(): Promise
+    {
+        return $this->callEndpoint('web3_clientVersion', 67, \string::class);
+    }
+
+    /**
+     * Returns Keccak-256 (not the standardized SHA3-256) of the given data.
+     * @see https://eth.wiki/json-rpc/API#web3_sha3
+     *
+     * @param HexString $data
+     *
+     * @return Promise<string> The SHA3 result of the given string.
+     */
+    public function web3SHA3(HexString $data): Promise
+    {
+        return $this->callEndpoint('web3_sha3', 64, Hash32::class, [(string) $data]);
+    }
+
+    /**
      * Creates new message call transaction or a contract creation for
      * signed transactions.
      * @see https://eth.wiki/json-rpc/API#eth_sendRawTransaction
@@ -93,14 +118,36 @@ class Client extends Base
     }
 
     /**
-     * Returns the current client version.
-     * @see https://eth.wiki/json-rpc/API#web3_clientVersion
+     * Returns the current network id.
+     * @see https://eth.wiki/json-rpc/API#net_version
      *
-     * @return Promise<string> The current client version.
+     * @return Promise<string> The current network id.
      */
-    public function web3ClientVersion(): Promise
+    public function netVersion(): Promise
     {
-        return $this->callEndpoint('web3_clientVersion', 67, \string::class);
+        return $this->callEndpoint('net_version', 67, \string::class);
+    }
+
+    /**
+     * Returns true if client is actively listening for network connections.
+     * @see https://eth.wiki/json-rpc/API#net_listening
+     *
+     * @return Promise<bool> true when listening, otherwise false.
+     */
+    public function netListening(): Promise
+    {
+        return $this->callEndpoint('net_listening', 67, \bool::class);
+    }
+
+    /**
+     * Returns true if client is actively listening for network connections.
+     * @see https://eth.wiki/json-rpc/API#net_peerCount
+     *
+     * @return Promise<int> Returns true when listening, otherwise false.
+     */
+    public function netPeerCount(): Promise
+    {
+        return $this->callEndpoint('net_peerCount', 67, \int::class);
     }
 
     /**
@@ -111,7 +158,7 @@ class Client extends Base
      */
     public function ethProtocolVersion(): Promise
     {
-        return $this->callEndpoint('eth_protocolVersion', 67, \string::class);
+        return $this->callEndpoint('net_version', 67, \string::class);
     }
 
     /**
@@ -134,6 +181,61 @@ class Client extends Base
     public function ethCoinbase(): Promise
     {
         return $this->callEndpoint('eth_coinbase', 64, HexAddress::class);
+    }
+
+    /**
+     * Returns true if client is actively mining new blocks.
+     * @see https://eth.wiki/json-rpc/API#eth_mining
+     *
+     * @return Promise<bool> Returns true if client is mining, otherwise false.
+     */
+    public function ethMining(): Promise
+    {
+        return $this->callEndpoint('eth_mining', 71, \bool::class);
+    }
+
+    /**
+     * Returns the number of hashes per second that the node is mining with.
+     * @see https://eth.wiki/json-rpc/API#eth_hashrate
+     *
+     * @return Promise<int> Number of hashes per second.
+     */
+    public function ethHashrate(): Promise
+    {
+        return $this->callEndpoint('eth_hashrate', 71, \int::class);
+    }
+
+    /**
+     * Returns the current price per gas.
+     * @see https://eth.wiki/json-rpc/API#eth_gasPrice
+     *
+     * @return Promise<Gwei|int> Gwei of the gas price (or int without bcmath).
+     */
+    public function ethGasPrice(): Promise
+    {
+        return $this->callEndpoint('eth_gasPrice', 73, Gwei::class);
+    }
+
+    /**
+     * Returns a list of addresses owned by client.
+     * @see https://eth.wiki/json-rpc/API#eth_accounts
+     *
+     * @return Promise<array[HexAddress]> Addresses owned by the client.
+     */
+    public function ethAccounts(): Promise
+    {
+        return $this->callEndpoint('eth_accounts', 1, HexAddress::class);
+    }
+
+    /**
+     * Returns the number of most recent block.
+     * @see https://eth.wiki/json-rpc/API#eth_blockNumber
+     *
+     * @return Promise<int> The current block number the client is on.
+     */
+    public function ethBlockNumber(): Promise
+    {
+        return $this->callEndpoint('eth_blockNumber', 83, \int::class);
     }
 
     /**
@@ -192,7 +294,11 @@ class Client extends Base
 
                 if ($error === null) {
                     if (isset(Client::$dataMap[$class])) {
-                        return Client::$dataMap[$class]($data);
+                        if (is_array($data)) {
+                            return array_map(Client::$dataMap[$class], $data);
+                        } else {
+                            return Client::$dataMap[$class]($data);
+                        }
                     }
 
                     return $data;

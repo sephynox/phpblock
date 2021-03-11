@@ -33,7 +33,7 @@ final class GweiTest extends TestCase
 
         $this->assertEquals('5.464653257', $gwei->toEth());
         $this->assertEquals('5464653257000000000', $gwei->toWei());
-        $this->assertEquals('0.005464567', Gwei::toEther('5464567'));
-        $this->assertEquals('45670', Gwei::toGwei('0.00004567'));
+        $this->assertEquals('0.005464567', Gwei::gweiToEth('5464567'));
+        $this->assertEquals('45670', Gwei::ethToGwei('0.00004567'));
     }
 }
