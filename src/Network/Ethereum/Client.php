@@ -27,11 +27,14 @@ use PHPBlock\Network\Ethereum\Type\Address;
 use PHPBlock\Network\Ethereum\Type\BlockIdentifier;
 use PHPBlock\Network\Ethereum\Type\BlockNumber;
 use PHPBlock\Network\Ethereum\Type\ChecksumAddress;
+use PHPBlock\Network\Ethereum\Type\EthType;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
 
+use function PHPBlock\Helper\hexToBigInt;
 use function PHPBlock\Helper\hexToInt;
+use function PHPBlock\Helper\intToHex;
 
 class Client extends Base
 {
@@ -51,10 +54,10 @@ class Client extends Base
                 \bool::class => fn ($v) => (bool) $v,
                 \string::class => fn ($v) => (string) $v,
                 Address::class => fn ($v) => new Address($v),
+                Gwei::class => fn ($v) => Client::gweiOrString($v),
                 HexAddress::class => fn ($v) => new HexAddress($v),
                 ChecksumAddress::class => fn ($v) => new ChecksumAddress($v),
                 DateTime::class => fn ($v) => (new DateTime())->setTimestamp(hexToInt($v)),
-                Gwei::class => fn ($v) => function_exists('bcdiv') ? new Gwei(hexToInt($v), true) : (int) $v,
                 SyncStatus::class => fn ($v) => is_bool($v) ? (bool) $v : new SyncStatus($v),
                 BlockIdentifier::class => fn ($v) => new BlockIdentifier($v),
                 BlockNumber::class => fn ($v) => new BlockNumber($v),
@@ -65,6 +68,22 @@ class Client extends Base
         }
 
         parent::__construct(new Factory($uri ?: static::DEFAULT_ENDPOINT));
+    }
+
+    /**
+     * Return a Gwei object or string.
+     *
+     * @param string $hex
+     *
+     * @return Gwei|string
+     */
+    public static function gweiOrString(string $hex, bool $wei = true)
+    {
+        if (function_exists('bcdiv')) {
+            return new Gwei(hexToBigInt($hex), $wei);
+        } else {
+            return hexToBigInt(EthType::stripPrefix($hex));
+        }
     }
 
     /**
@@ -209,7 +228,7 @@ class Client extends Base
      * Returns the current price per gas.
      * @see https://eth.wiki/json-rpc/API#eth_gasPrice
      *
-     * @return Promise<Gwei|int> Gwei of the gas price (or int without bcmath).
+     * @return Promise<Gwei|string> Gwei of the gas price (string without bcmath).
      */
     public function ethGasPrice(): Promise
     {
@@ -239,6 +258,27 @@ class Client extends Base
     }
 
     /**
+     * Returns the balance of the account of given address.
+     * @see https://eth.wiki/json-rpc/API#eth_getBalance
+     *
+     * @param HexAddress $address Address to check for balance.
+     * @param int|string $data Block number, or "latest", "earliest", "pending"
+     *
+     * @return Promise<Gwei|string> Gwei of the current balance (string without bcmath).
+     */
+    public function ethGetBalance(HexAddress $address, $data): Promise
+    {
+        if (is_int($data)) {
+            $data = intToHex($data);
+        } else {
+            $data = trim($data);
+        }
+
+        $address = (string) $address;
+        return $this->callEndpoint('eth_getBalance', 1, Gwei::class, [$address, $data]);
+    }
+
+    /**
      * Returns information about a block by hash.
      *
      * @param Hash32 $hash Hash of a block.
@@ -246,7 +286,7 @@ class Client extends Base
      *
      * @return Promise<Block>
      */
-    public function getBlockByHash(Hash32 $hash, bool $Full = true): Promise
+    public function ethGetBlockByHash(Hash32 $hash, bool $Full = true): Promise
     {
         return $this->callEndpoint(
             'eth_getBlockByHash',

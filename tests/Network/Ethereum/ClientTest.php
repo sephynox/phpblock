@@ -244,7 +244,7 @@ final class ClientTest extends TestCase
         if (function_exists('bcdiv')) {
             $this->assertInstanceOf(Gwei::class, $price);
         } else {
-            $this->assertIsInt($price);
+            $this->assertIsString($price);
         }
     }
 
@@ -286,5 +286,29 @@ final class ClientTest extends TestCase
 
         $this->client->run();
         $this->assertIsInt($block);
+    }
+
+    /**
+     * Test eth_getBalance call.
+     *
+     * @return void
+     */
+    public function testEthGetBalanceCall(): void
+    {
+        $balance = null;
+        $address = new HexAddress($_ENV['ETH_TEST_ADDRESS']);
+
+        $this->client->ethGetBalance($address, 'latest')
+            ->then(function ($gwei) use (&$balance) {
+                $balance = $gwei;
+            });
+
+        $this->client->run();
+
+        if (function_exists('bcdiv')) {
+            $this->assertInstanceOf(Gwei::class, $balance);
+        } else {
+            $this->assertIsString($balance);
+        }
     }
 }

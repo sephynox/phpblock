@@ -24,9 +24,10 @@ final class GweiTest extends TestCase
      */
     public function testGweiConversions(): void
     {
-        if (!function_exists('bcmul')) {
+        if (!function_exists('bcdiv')) {
             # Optional extension is not available.
             $this->assertTrue(true);
+            return;
         }
 
         $gwei = new Gwei('5464653257');

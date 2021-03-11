@@ -61,6 +61,18 @@ function hexToInt(string $hex): int
 }
 
 /**
+ * Convert a hex string to an integer.
+ *
+ * @param string $hex
+ *
+ * @return string
+ */
+function hexToBigInt(string $hex): string
+{
+    return number_format(hexdec($hex), 0, '.', '');
+}
+
+/**
  * Convert an integer into a hex string.
  *
  * @param integer $int
