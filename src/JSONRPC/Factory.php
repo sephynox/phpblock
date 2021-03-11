@@ -30,11 +30,13 @@ class Factory implements RPCFactoryInterface
 
     private string $uri;
     private string $version = '2.0';
+    private int $port = 80;
 
-    public function __construct(string $uri, string $version = '2.0')
+    public function __construct(string $uri, string $version = '2.0', int $port = 80)
     {
         $this->uri = $uri;
         $this->version = $version;
+        $this->port = $port;
     }
 
     #region RPCFactoryInterface Members
@@ -61,6 +63,22 @@ class Factory implements RPCFactoryInterface
         array $headers = []
     ): ResponseInterface {
         return new Response($status, $headers, $body);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBaseUri(): string
+    {
+        return $this->uri;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPort(): int
+    {
+        return $this->port;
     }
 
     /**

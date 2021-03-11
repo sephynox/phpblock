@@ -47,9 +47,9 @@ class Client extends Base
     {
         if (!isset(static::$dataMap)) {
             static::$dataMap = [
+                \int::class => fn ($v) => (int) $v,
                 \bool::class => fn ($v) => (bool) $v,
-                \int::class => fn ($v) => hexToInt($v),
-                \string::class => fn ($v) => hexToStr($v),
+                \string::class => fn ($v) => (string) $v,
                 Address::class => fn ($v) => new Address($v),
                 HexAddress::class => fn ($v) => new HexAddress($v),
                 ChecksumAddress::class => fn ($v) => new ChecksumAddress($v),
@@ -82,7 +82,7 @@ class Client extends Base
      * @param string $data The signed transaction data.
      * @return Promise<Hash32> The transaction hash.
      */
-    public function sendRawTransaction(string $data): Promise
+    public function ethSendRawTransaction(string $data): Promise
     {
         return $this->callEndpoint(
             'eth_sendRawTransaction',
@@ -93,12 +93,23 @@ class Client extends Base
     }
 
     /**
+     * Returns the current client version.
+     * @see https://eth.wiki/json-rpc/API#web3_clientVersion
+     *
+     * @return Promise<string> The current client version.
+     */
+    public function web3ClientVersion(): Promise
+    {
+        return $this->callEndpoint('web3_clientVersion', 67, \string::class);
+    }
+
+    /**
      * Returns the current ethereum protocol version.
      * @see https://eth.wiki/json-rpc/API#eth_protocolversion
      *
      * @return Promise<string> The current ethereum protocol version.
      */
-    public function protocolVersion(): Promise
+    public function ethProtocolVersion(): Promise
     {
         return $this->callEndpoint('eth_protocolVersion', 67, \string::class);
     }
@@ -109,7 +120,7 @@ class Client extends Base
      *
      * @return Promise<SyncStatus|false> Returns a SynStatus object or false.
      */
-    public function syncing(): Promise
+    public function ethSyncing(): Promise
     {
         return $this->callEndpoint('eth_syncing', 1, SyncStatus::class);
     }
@@ -120,7 +131,7 @@ class Client extends Base
      *
      * @return Promise<HexAddress> The current coinbase address.
      */
-    public function coinbase(): Promise
+    public function ethCoinbase(): Promise
     {
         return $this->callEndpoint('eth_coinbase', 64, HexAddress::class);
     }

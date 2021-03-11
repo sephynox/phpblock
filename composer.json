@@ -28,7 +28,8 @@
         "kornrunner/keccak": "^1.1"
     },
     "suggest": {
-        "ext-bcmath": "Needed to support Gwei conversions."
+        "ext-bcmath": "Needed to support Gwei conversions.",
+        "ext-swoole": "Allow PHP swoole extension."
     },
     "autoload": {
         "psr-4": {
@@ -47,7 +48,8 @@
         "phpunit/phpunit": "^9",
         "friendsofphp/php-cs-fixer": "3.0.x-dev",
         "phpbench/phpbench": "^0.17.1",
-        "brainmaestro/composer-git-hooks": "^2.8"
+        "brainmaestro/composer-git-hooks": "^2.8",
+        "eaglewu/swoole-ide-helper": "dev-master"
     },
     "scripts": {
         "tests": [

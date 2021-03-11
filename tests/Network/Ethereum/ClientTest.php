@@ -37,6 +37,24 @@ final class ClientTest extends TestCase
     }
 
     /**
+     * Test  web3_clientVersion call.
+     *
+     * @return void
+     */
+    public function testweb3ClientVersionCall(): void
+    {
+        $ver = null;
+
+        $this->client->web3ClientVersion()
+            ->then(function (string $version) use (&$ver) {
+                $ver = $version;
+            });
+
+        $this->client->run();
+        $this->assertNotNull($ver);
+    }
+
+    /**
      * Test eth_protocolVersion call.
      *
      * @return void
@@ -45,7 +63,7 @@ final class ClientTest extends TestCase
     {
         $ver = null;
 
-        $this->client->protocolVersion()
+        $this->client->ethProtocolVersion()
             ->then(function (string $version) use (&$ver) {
                 $ver = $version;
             });
@@ -63,7 +81,7 @@ final class ClientTest extends TestCase
     {
         $stat = null;
 
-        $this->client->syncing()
+        $this->client->ethSyncing()
             ->then(function ($status) use (&$stat) {
                 $stat = $status;
             });
@@ -81,7 +99,7 @@ final class ClientTest extends TestCase
     {
         $addr = null;
 
-        $this->client->coinbase()
+        $this->client->ethCoinbase()
             ->then(function ($address) use (&$addr) {
                 $addr = $address;
             });

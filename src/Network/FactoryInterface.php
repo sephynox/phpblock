@@ -48,4 +48,18 @@ interface FactoryInterface
         string $body = '',
         array $headers = []
     ): ResponseInterface;
+
+    /**
+     * Return the factory base uri.
+     *
+     * @return string
+     */
+    public function getBaseUri(): string;
+
+    /**
+     * Return the factory port.
+     *
+     * @return int
+     */
+    public function getPort(): int;
 }

@@ -34,7 +34,7 @@ require_once('./vendor/autoload.php');
 
 $Ethereum = new PHPBlock\Network\Ethereum\Client();
 
-$Ethereum->protocolVersion()
+$Ethereum->ethProtocolVersion()
     ->then(function (string $version) {
         echo "The protocol version is: " . $version . "\n";
     });
