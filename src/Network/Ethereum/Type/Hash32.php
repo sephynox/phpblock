@@ -16,7 +16,7 @@ use kornrunner\Keccak;
 use PHPBlock\Network\Ethereum\Exception\HashException;
 
 use function PHPBlock\Helper\byteToHex;
-use function PHPBlock\Helper\hexToByte;
+use function PHPBlock\Helper\hexToBytes;
 
 class Hash32 extends EthType
 {
@@ -41,7 +41,7 @@ class Hash32 extends EthType
             throw new HashException($value);
         }
 
-        return hexToByte($strValue);
+        return hexToBytes($strValue);
     }
 
     /**

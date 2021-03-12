@@ -4,7 +4,7 @@
  * Helper functions for hex related procedures.
  *
  * @package PHPBlock
- * @category Type
+ * @category Helper
  * @author Tanveer Wahid <tan@wahid.email>
  * @license MIT
  * @access public
@@ -43,7 +43,7 @@ function hexToStr(string $hex): string
  *
  * @return array
  */
-function hexToByte(string $hex): array
+function hexToBytes(string $hex): array
 {
     return unpack('C*', hex2bin($hex));
 }

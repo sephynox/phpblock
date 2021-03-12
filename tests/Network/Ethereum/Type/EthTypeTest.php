@@ -11,9 +11,13 @@
  */
 
 declare(strict_types=1);
+
+namespace PHPBlock\Network\Ethereum\Type;
+
 require_once __DIR__ . '/../../../Type/TypingTest.php';
 
 use PHPBlock\Network\Ethereum\Type\EthType;
+use PHPBlock\Type\TypingTest;
 
 abstract class EthTypeTest extends TypingTest
 {

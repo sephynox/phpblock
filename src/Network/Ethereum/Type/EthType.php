@@ -12,9 +12,9 @@
 
 namespace PHPBlock\Network\Ethereum\Type;
 
+use Exception;
 use kornrunner\Keccak;
 use PHPBlock\Type\Typing;
-use Exception;
 use PHPBlock\Network\Ethereum\Model\Gwei;
 
 use function PHPBlock\Helper\hexToBigInt;
@@ -62,15 +62,15 @@ abstract class EthType extends Typing
      * @see https://eips.ethereum.org/EIPS/eip-55
      *
      * @param string $value
-     * @param integer $length
+     * @param integer $len
      *
      * @return string
      */
-    public static function checksumEncode(string $value, int $length = 256): string
+    public static function checksumEncode(string $value, int $len = 256): string
     {
         $strReturn = '';
         $strHash = static::stripPrefix(strtolower($value));
-        $strHashed = Keccak::hash($strHash, $length);
+        $strHashed = Keccak::hash($strHash, $len);
         $arrHash = str_split($strHash);
 
         foreach ($arrHash as $i => $v) {

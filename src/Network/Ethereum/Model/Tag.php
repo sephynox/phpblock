@@ -70,4 +70,13 @@ class Tag extends EthModel
     }
 
     #endregion
+
+    #region JsonSerializable Members
+
+    public function jsonSerialize()
+    {
+        return $this->__toString();
+    }
+
+    #endregion
 }

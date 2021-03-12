@@ -12,6 +12,8 @@
 
 declare(strict_types=1);
 
+namespace PHPBlock\Type;
+
 use PHPUnit\Framework\TestCase;
 use PHPBlock\Type\Typing;
 

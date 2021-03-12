@@ -7,17 +7,17 @@ use PHPBlock\Network\Ethereum\Model\Tag;
 use PHPBlock\Network\Ethereum\Model\Transaction;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 
+use function PHPBlock\Helper\pass;
+
 $Ethereum = new PHPBlock\Network\Ethereum\Client();
 
 $Ethereum->ethAccounts()
     ->then(function (array $hexAddresses) use ($Ethereum) {
         $to = $hexAddresses[array_rand($hexAddresses)];
         $from = $hexAddresses[array_rand($hexAddresses)];
+        $tag = new Tag(Tag::LATEST);
 
-        return $Ethereum->ethGetBalance($to, new Tag(Tag::LATEST))
-            ->then(function ($balance) use ($to, $from) {
-                return [$balance, $to, $from];
-            });
+        return pass($Ethereum->ethGetBalance($to, $tag), $to, $from);
     })->then(function ($data) use ($Ethereum) {
         [$balance, $to, $from] = $data;
 

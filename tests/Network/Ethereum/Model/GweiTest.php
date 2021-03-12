@@ -12,6 +12,8 @@
 
 declare(strict_types=1);
 
+namespace PHPBlock\Network\Ethereum\Model;
+
 use PHPBlock\Network\Ethereum\Model\Gwei;
 use PHPUnit\Framework\TestCase;
 

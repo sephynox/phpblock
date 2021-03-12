@@ -11,6 +11,9 @@
  */
 
 declare(strict_types=1);
+
+namespace PHPBlock\Network\Ethereum\Model;
+
 require_once 'EthModelTest.php';
 
 use PHPBlock\Network\Ethereum\Model\SyncStatus;

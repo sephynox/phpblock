@@ -114,4 +114,13 @@ class Gwei extends EthModel
     }
 
     #endregion
+
+    #region JsonSerializable Members
+
+    public function jsonSerialize()
+    {
+        return $this->toWei();
+    }
+
+    #endregion
 }

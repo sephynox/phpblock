@@ -11,6 +11,9 @@
  */
 
 declare(strict_types=1);
+
+namespace PHPBlock\Network\Ethereum\Type;
+
 require_once 'EthTypeTest.php';
 
 use PHPBlock\Network\Ethereum\Type\HexAddress;

@@ -21,6 +21,7 @@ class Transaction extends EthModel
 {
     public HexAddress $to;
     public HexAddress $from;
+    public ?Hash32 $hash = null;
     public $value = null;
     public $gas = null;
     public $gasPrice = null;
@@ -76,18 +77,19 @@ class Transaction extends EthModel
     {
         if (!isset(static::$map)) {
             static::$map = [
-                'to' => Client::$dataMap[\int::class],
+                'to' => Client::$dataMap[HexAddress::class],
                 'from' => Client::$dataMap[HexAddress::class],
                 'blockNumber' => Client::$dataMap[\int::class],
                 'blockHash' => Client::$dataMap[Hash32::class],
                 'gas' => Client::$dataMap[Gwei::class],
                 'gasPrice' => Client::$dataMap[Gwei::class],
-                'input' => Client::$dataMap[Hash32::class],
-                'none' => Client::$dataMap[HexString::class],
-                'transactionIndex' => Client::$dataMap[HexAddress::class],
-                'value' => Client::$dataMap[\int::class],
+                'hash' => Client::$dataMap[Hash32::class],
+                'input' => Client::$dataMap[HexString::class],
+                'nonce' => Client::$dataMap[\int::class],
+                'transactionIndex' => Client::$dataMap[\int::class],
+                'value' => Client::$dataMap[Gwei::class],
                 'v' => Client::$dataMap[\int::class],
-                'r' => Client::$dataMap[\int::class],
+                'r' => Client::$dataMap[Hash32::class],
                 's' => Client::$dataMap[Hash32::class]
             ];
         }

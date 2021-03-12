@@ -12,6 +12,8 @@
 
 declare(strict_types=1);
 
+namespace PHPBlock\JSONRPC;
+
 use PHPUnit\Framework\TestCase;
 use PHPBlock\JSONRPC\Factory;
 use PHPBlock\JSONRPC\RequestInterface;

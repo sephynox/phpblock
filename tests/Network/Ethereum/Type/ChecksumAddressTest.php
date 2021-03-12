@@ -11,9 +11,11 @@
  */
 
 declare(strict_types=1);
+
+namespace PHPBlock\Network\Ethereum\Type;
+
 require_once 'EthTypeTest.php';
 
-use kornrunner\Keccak;
 use PHPBlock\Network\Ethereum\Type\Address;
 use PHPBlock\Network\Ethereum\Type\ChecksumAddress;
 

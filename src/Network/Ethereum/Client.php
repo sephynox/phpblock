@@ -57,6 +57,7 @@ final class Client extends Base
                 Address::class => fn ($v) => new Address($v),
                 HexAddress::class => fn ($v) => new HexAddress($v),
                 Gwei::class => fn ($v) => EthType::gweiOrString($v),
+                Transaction::class => fn ($v) => new Transaction($v),
                 ChecksumAddress::class => fn ($v) => new ChecksumAddress($v),
                 DateTime::class => fn ($v) => (new DateTime())->setTimestamp(hexToInt($v)),
                 SyncStatus::class => fn ($v) => is_bool($v) ? (bool) $v : new SyncStatus($v),
@@ -378,6 +379,21 @@ final class Client extends Base
     {
         $data = [(string) $tag, $Full];
         return $this->callEndpoint('eth_getBlockByNumber', 1, Block::class, $data);
+    }
+
+    /**
+     * Returns the information about a transaction requested by
+     * transaction hash.
+     * @see https://eth.wiki/json-rpc/API#eth_getTransactionByHash
+     *
+     * @param Hash32 $hash Hash of a transaction
+     *
+     * @return Promise<Transaction|null> A transaction object, or null.
+     */
+    public function ethGetTransactionByHash(Hash32 $hash): Promise
+    {
+        $data = [(string) $hash];
+        return $this->callEndpoint('eth_getTransactionByHash', 1, Transaction::class, $data);
     }
 
     #endregion

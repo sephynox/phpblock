@@ -12,11 +12,10 @@
 
 namespace PHPBlock\Network\Ethereum\Type;
 
-use kornrunner\Keccak;
 use PHPBlock\Network\Ethereum\Exception\AddressException;
 
 use function PHPBlock\Helper\byteToHex;
-use function PHPBlock\Helper\hexToByte;
+use function PHPBlock\Helper\hexToBytes;
 
 class Address extends EthType
 {
@@ -70,7 +69,7 @@ class Address extends EthType
             throw new AddressException($value);
         }
 
-        return hexToByte($strValue);
+        return hexToBytes($strValue);
     }
 
     /**

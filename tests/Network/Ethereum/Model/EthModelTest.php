@@ -12,6 +12,8 @@
 
 declare(strict_types=1);
 
+namespace PHPBlock\Network\Ethereum\Model;
+
 use PHPUnit\Framework\TestCase;
 
 abstract class EthModelTest extends TestCase

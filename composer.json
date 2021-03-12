@@ -36,7 +36,8 @@
             "PHPBlock\\": "src/"
         },
         "files": [
-            "src/Helper/HexTools.php"
+            "src/Helper/HexTools.php",
+            "src/Helper/PromiseTools.php"
         ]
     },
     "autoload-dev": {

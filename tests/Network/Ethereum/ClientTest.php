@@ -12,6 +12,8 @@
 
 declare(strict_types=1);
 
+namespace PHPBlock\Network\Ethereum;
+
 use kornrunner\Keccak;
 use PHPUnit\Framework\TestCase;
 use PHPBlock\Network\Ethereum\Client;
@@ -38,7 +40,7 @@ final class ClientTest extends TestCase
         $this->client->ethAccounts()
             ->then(function (array $hexAddresses) use (&$addresses) {
                 $this->to = $hexAddresses[0];
-                $this->from = $hexAddresses[0];
+                $this->from = $hexAddresses[1];
                 $this->testAddress = $hexAddresses[array_rand($hexAddresses)];
             });
 
@@ -350,7 +352,7 @@ final class ClientTest extends TestCase
      *
      * @return void
      */
-    public function testSendTransactionCall(): void
+    public function testEthSendTransactionCall(): void
     {
         $hash = null;
         $transaction = Transaction::make(
@@ -447,5 +449,36 @@ final class ClientTest extends TestCase
 
         $this->client->run();
         $this->assertInstanceOf(Block::class, $blck);
+    }
+
+    /**
+     * Test eth_call call.
+     *
+     * @return void
+     */
+    public function testEthGetTransactionByHashCall(): void
+    {
+        /** @var Hash32 */
+        $hash = null;
+        /** @var Transaction */
+        $trans = null;
+        $value = new Gwei(Gwei::ethToGwei('.0001'));
+        $transact = Transaction::make($this->to, $this->from, $value);
+
+        $this->client->ethSendTransaction($transact)
+            ->then(function (Hash32 $hash32) use (&$hash) {
+                $hash = $hash32;
+                return $hash;
+            })->then(function (Hash32 $hash32) {
+                return $this->client->ethGetTransactionByHash($hash32);
+            })->then(function ($transaction) use (&$trans) {
+                $trans = $transaction;
+            });
+
+        $this->client->run();
+        $this->assertInstanceOf(Transaction::class, $trans);
+        $this->assertInstanceOf(Hash32::class, $trans->hash);
+        $this->assertEquals($hash, $trans->hash);
+        $this->assertEquals($value, $trans->value);
     }
 }
