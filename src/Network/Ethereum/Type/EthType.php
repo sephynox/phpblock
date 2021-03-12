@@ -15,6 +15,9 @@ namespace PHPBlock\Network\Ethereum\Type;
 use kornrunner\Keccak;
 use PHPBlock\Type\Typing;
 use Exception;
+use PHPBlock\Network\Ethereum\Model\Gwei;
+
+use function PHPBlock\Helper\hexToBigInt;
 
 abstract class EthType extends Typing
 {
@@ -95,5 +98,21 @@ abstract class EthType extends Typing
     public function toEth()
     {
         return $this->pack($this->value());
+    }
+
+    /**
+     * Return a Gwei object or string.
+     *
+     * @param string $hex
+     *
+     * @return Gwei|string
+     */
+    public static function gweiOrString(string $hex, bool $wei = true)
+    {
+        if (function_exists('bcdiv')) {
+            return new Gwei(hexToBigInt($hex), $wei);
+        } else {
+            return hexToBigInt(EthType::stripPrefix($hex));
+        }
     }
 }

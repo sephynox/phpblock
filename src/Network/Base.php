@@ -40,6 +40,8 @@ abstract class Base implements BaseInterface
         static::$builder = $Factory;
     }
 
+    #region BaseInterface Members
+
     /**
      * {@inheritdoc}
      */
@@ -131,4 +133,6 @@ abstract class Base implements BaseInterface
     {
         return $this->browser;
     }
+
+    #endregion
 }

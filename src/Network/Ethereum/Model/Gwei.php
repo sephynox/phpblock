@@ -58,7 +58,7 @@ class Gwei extends EthModel
      */
     public static function gweiToEth(string $value): string
     {
-        return rtrim(bcmul($value, static::$ether, 18), '0');
+        return rtrim(rtrim(bcmul($value, static::$ether, 18), '0'), '.');
     }
 
     /**

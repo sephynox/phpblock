@@ -1,4 +1,7 @@
 {
     "php_disable_ini": true,
+    "php_config": {
+        "extension": ["json.so"]
+    },
     "bootstrap": "vendor/autoload.php"
 }

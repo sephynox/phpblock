@@ -15,8 +15,11 @@ declare(strict_types=1);
 use kornrunner\Keccak;
 use PHPUnit\Framework\TestCase;
 use PHPBlock\Network\Ethereum\Client;
+use PHPBlock\Network\Ethereum\Model\Block;
 use PHPBlock\Network\Ethereum\Model\Gwei;
 use PHPBlock\Network\Ethereum\Model\SyncStatus;
+use PHPBlock\Network\Ethereum\Model\Tag;
+use PHPBlock\Network\Ethereum\Model\Transaction;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
@@ -24,10 +27,22 @@ use PHPBlock\Network\Ethereum\Type\HexString;
 final class ClientTest extends TestCase
 {
     private Client $client;
+    private HexAddress $to;
+    private HexAddress $from;
+    private HexAddress $testAddress;
 
     public function setUp(): void
     {
         $this->client = new Client($_ENV['ETH_TEST_CLIENT']);
+
+        $this->client->ethAccounts()
+            ->then(function (array $hexAddresses) use (&$addresses) {
+                $this->to = $hexAddresses[0];
+                $this->from = $hexAddresses[0];
+                $this->testAddress = $hexAddresses[array_rand($hexAddresses)];
+            });
+
+        $this->client->run();
     }
 
     /**
@@ -296,9 +311,8 @@ final class ClientTest extends TestCase
     public function testEthGetBalanceCall(): void
     {
         $balance = null;
-        $address = new HexAddress($_ENV['ETH_TEST_ADDRESS']);
 
-        $this->client->ethGetBalance($address, 'latest')
+        $this->client->ethGetBalance($this->testAddress, new Tag(Tag::LATEST))
             ->then(function ($gwei) use (&$balance) {
                 $balance = $gwei;
             });
@@ -310,5 +324,128 @@ final class ClientTest extends TestCase
         } else {
             $this->assertIsString($balance);
         }
+    }
+
+    /**
+     * Test eth_blockNumber call.
+     *
+     * @return void
+     */
+    public function testEthGetTransactionCountCall(): void
+    {
+        $count = null;
+        $tag = new Tag(Tag::LATEST);
+
+        $this->client->ethGetTransactionCount($this->testAddress, $tag)
+            ->then(function (int $int) use (&$count) {
+                $count = $int;
+            });
+
+        $this->client->run();
+        $this->assertIsInt($count);
+    }
+
+    /**
+     * Test eth_call call.
+     *
+     * @return void
+     */
+    public function testSendTransactionCall(): void
+    {
+        $hash = null;
+        $transaction = Transaction::make(
+            $this->to,
+            $this->from,
+            new Gwei(Gwei::ethToGwei('.0001'))
+        );
+
+        $this->client->ethSendTransaction($transaction)
+            ->then(function (Hash32 $hash32) use (&$hash) {
+                $hash = $hash32;
+            });
+
+        $this->client->run();
+        $this->assertInstanceOf(Hash32::class, $hash);
+    }
+
+    /**
+     * Test eth_call call.
+     *
+     * @return void
+     */
+    public function testEthCallCall(): void
+    {
+        $data = null;
+        $transaction = Transaction::make($this->to, $this->from);
+
+        $this->client->ethCall($transaction, new Tag(Tag::LATEST))
+            ->then(function (string $string) use (&$data) {
+                $data = $string;
+            });
+
+        $this->client->run();
+        $this->assertIsString($data);
+    }
+
+    /**
+     * Test eth_estimateGas call.
+     *
+     * @return void
+     */
+    public function testEthEstimateGasCall(): void
+    {
+        $gas = null;
+        $transaction = Transaction::make($this->to, $this->from);
+
+        $this->client->ethEstimateGas($transaction, new Tag(Tag::LATEST))
+            ->then(function ($gwei) use (&$gas) {
+                $gas = $gwei;
+            });
+
+        $this->client->run();
+
+        if (function_exists('bcdiv')) {
+            $this->assertInstanceOf(Gwei::class, $gas);
+        } else {
+            $this->assertIsString($gas);
+        }
+    }
+
+    /**
+     * Test eth_blockNumber call.
+     *
+     * @return void
+     */
+    public function testEthGetBlockTransactionCountByHashCall(): void
+    {
+        $count = null;
+
+        $this->client->ethGetBlockByNumber(new Tag(Tag::EARLIEST), true)
+            ->then(function (Block $block) {
+                return $this->client->ethGetBlockTransactionCountByHash($block->hash);
+            })->then(function (int $int) use (&$count) {
+                $count = $int;
+            });
+
+        $this->client->run();
+        $this->assertIsInt($count);
+    }
+
+    /**
+     * Test eth_blockNumber call.
+     *
+     * @return void
+     */
+    public function testEthGetBlockByNumberCall(): void
+    {
+        $blck = null;
+
+        $this->client->ethGetBlockByNumber(new Tag(Tag::EARLIEST), true)
+            ->then(function (Block $block) use (&$blck) {
+                $blck = $block;
+            });
+
+        $this->client->run();
+        $this->assertInstanceOf(Block::class, $blck);
     }
 }

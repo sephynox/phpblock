@@ -19,22 +19,53 @@ use PHPBlock\Network\Ethereum\Type\HexString;
 
 class Transaction extends EthModel
 {
-    public ?int $blockNumber;
-    public ?Hash32 $blockHash;
+    public HexAddress $to;
     public HexAddress $from;
-    public int $gas;
-    public int $gasPrice;
-    public Hash32 $hash;
-    public HexString $input;
-    public int $none;
-    public ?HexAddress $to;
-    public ?int $transactionIndex;
-    public int $value;
-    public int $v;
-    public Hash32 $r;
-    public Hash32 $s;
+    public $value = null;
+    public $gas = null;
+    public $gasPrice = null;
+    public ?int $blockNumber = null;
+    public ?Hash32 $blockHash = null;
+    public ?Hash32 $data = null;
+    public ?HexString $input = null;
+    public ?int $nonce = null;
+    public ?int $transactionIndex = null;
+    public ?int $v = null;
+    public ?Hash32 $r = null;
+    public ?Hash32 $s = null;
 
     private static $map;
+
+    /**
+     * Alias for constructor.
+     *
+     * @param HexAddress $to
+     * @param HexAddress $from
+     * @param Gwei|string $gas
+     * @param Gwei|string $gasPrice
+     * @param Gwei|string $value
+     * @param Hash32 $data
+     * @return Transaction
+     */
+    public static function make(
+        HexAddress $to,
+        HexAddress $from,
+        $value = null,
+        Hash32 $data = null,
+        $gas = null,
+        $gasPrice = null
+    ): Transaction {
+        $transaction = new static([]);
+
+        $transaction->to = $to;
+        $transaction->from = $from;
+        $transaction->value = $value;
+        $transaction->data = $data;
+        $transaction->gas = $gas;
+        $transaction->gasPrice = $gasPrice;
+
+        return $transaction;
+    }
 
     #region BaseModel Members
 
@@ -45,14 +76,14 @@ class Transaction extends EthModel
     {
         if (!isset(static::$map)) {
             static::$map = [
+                'to' => Client::$dataMap[\int::class],
+                'from' => Client::$dataMap[HexAddress::class],
                 'blockNumber' => Client::$dataMap[\int::class],
                 'blockHash' => Client::$dataMap[Hash32::class],
-                'from' => Client::$dataMap[HexAddress::class],
-                'gas' => Client::$dataMap[\int::class],
-                'gasPrice' => Client::$dataMap[\int::class],
+                'gas' => Client::$dataMap[Gwei::class],
+                'gasPrice' => Client::$dataMap[Gwei::class],
                 'input' => Client::$dataMap[Hash32::class],
                 'none' => Client::$dataMap[HexString::class],
-                'to' => Client::$dataMap[\int::class],
                 'transactionIndex' => Client::$dataMap[HexAddress::class],
                 'value' => Client::$dataMap[\int::class],
                 'v' => Client::$dataMap[\int::class],

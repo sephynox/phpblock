@@ -14,7 +14,9 @@
 
 namespace PHPBlock\Type;
 
-abstract class Typing
+use JsonSerializable;
+
+abstract class Typing implements JsonSerializable
 {
     private $val;
 
@@ -31,6 +33,15 @@ abstract class Typing
     {
         return (string) $this->pack($this->val);
     }
+
+    #region JsonSerializable Members
+
+    public function jsonSerialize()
+    {
+        return $this->__toString();
+    }
+
+    #endregion
 
     /**
      * Get the stored value.

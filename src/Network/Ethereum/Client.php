@@ -23,6 +23,8 @@ use PHPBlock\Network\Base;
 use PHPBlock\Network\Ethereum\Model\Block;
 use PHPBlock\Network\Ethereum\Model\Gwei;
 use PHPBlock\Network\Ethereum\Model\SyncStatus;
+use PHPBlock\Network\Ethereum\Model\Tag;
+use PHPBlock\Network\Ethereum\Model\Transaction;
 use PHPBlock\Network\Ethereum\Type\Address;
 use PHPBlock\Network\Ethereum\Type\BlockIdentifier;
 use PHPBlock\Network\Ethereum\Type\BlockNumber;
@@ -32,11 +34,10 @@ use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
 
-use function PHPBlock\Helper\hexToBigInt;
 use function PHPBlock\Helper\hexToInt;
 use function PHPBlock\Helper\intToHex;
 
-class Client extends Base
+final class Client extends Base
 {
     public const DEFAULT_ENDPOINT = 'http://127.0.0.1:8545';
     public static $dataMap;
@@ -54,8 +55,8 @@ class Client extends Base
                 \bool::class => fn ($v) => (bool) $v,
                 \string::class => fn ($v) => (string) $v,
                 Address::class => fn ($v) => new Address($v),
-                Gwei::class => fn ($v) => Client::gweiOrString($v),
                 HexAddress::class => fn ($v) => new HexAddress($v),
+                Gwei::class => fn ($v) => EthType::gweiOrString($v),
                 ChecksumAddress::class => fn ($v) => new ChecksumAddress($v),
                 DateTime::class => fn ($v) => (new DateTime())->setTimestamp(hexToInt($v)),
                 SyncStatus::class => fn ($v) => is_bool($v) ? (bool) $v : new SyncStatus($v),
@@ -70,29 +71,7 @@ class Client extends Base
         parent::__construct(new Factory($uri ?: static::DEFAULT_ENDPOINT));
     }
 
-    /**
-     * Return a Gwei object or string.
-     *
-     * @param string $hex
-     *
-     * @return Gwei|string
-     */
-    public static function gweiOrString(string $hex, bool $wei = true)
-    {
-        if (function_exists('bcdiv')) {
-            return new Gwei(hexToBigInt($hex), $wei);
-        } else {
-            return hexToBigInt(EthType::stripPrefix($hex));
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function factory(): RPCFactoryInterface
-    {
-        return parent::factory();
-    }
+    #region Web3 Calls
 
     /**
      * Returns the current client version.
@@ -118,23 +97,9 @@ class Client extends Base
         return $this->callEndpoint('web3_sha3', 64, Hash32::class, [(string) $data]);
     }
 
-    /**
-     * Creates new message call transaction or a contract creation for
-     * signed transactions.
-     * @see https://eth.wiki/json-rpc/API#eth_sendRawTransaction
-     *
-     * @param string $data The signed transaction data.
-     * @return Promise<Hash32> The transaction hash.
-     */
-    public function ethSendRawTransaction(string $data): Promise
-    {
-        return $this->callEndpoint(
-            'eth_sendRawTransaction',
-            1,
-            Hash32::class,
-            [$data]
-        );
-    }
+    #endregion
+
+    #region Net Calls
 
     /**
      * Returns the current network id.
@@ -168,6 +133,10 @@ class Client extends Base
     {
         return $this->callEndpoint('net_peerCount', 67, \int::class);
     }
+
+    #endregion
+
+    #region Eth Calls
 
     /**
      * Returns the current ethereum protocol version.
@@ -243,7 +212,7 @@ class Client extends Base
      */
     public function ethAccounts(): Promise
     {
-        return $this->callEndpoint('eth_accounts', 1, HexAddress::class);
+        return $this->callEndpoint('eth_accounts', 1, HexAddress::class, [], true);
     }
 
     /**
@@ -262,24 +231,128 @@ class Client extends Base
      * @see https://eth.wiki/json-rpc/API#eth_getBalance
      *
      * @param HexAddress $address Address to check for balance.
-     * @param int|string $data Block number, or "latest", "earliest", "pending"
+     * @param Tag $data Block number, or "latest", "earliest", "pending" as Tag.
      *
      * @return Promise<Gwei|string> Gwei of the current balance (string without bcmath).
      */
-    public function ethGetBalance(HexAddress $address, $data): Promise
+    public function ethGetBalance(HexAddress $address, Tag $tag): Promise
     {
-        if (is_int($data)) {
-            $data = intToHex($data);
-        } else {
-            $data = trim($data);
-        }
+        $data = [(string) $address, (string) $tag];
+        return $this->callEndpoint('eth_getBalance', 1, Gwei::class, $data);
+    }
 
-        $address = (string) $address;
-        return $this->callEndpoint('eth_getBalance', 1, Gwei::class, [$address, $data]);
+    /**
+     * Returns the value from a storage position at a given address.
+     * @see https://eth.wiki/json-rpc/API#eth_getStorageAt
+     *
+     * @param HexAddress $address Address of the storage.
+     * @param int $position Position in the storage.
+     * @param Tag $data Block number, or "latest", "earliest", "pending" as Tag.
+     *
+     * @return Promise<string> The value at this storage position.
+     */
+    public function ethGetStorageAt(HexAddress $address, int $position, Tag $tag): Promise
+    {
+        $data = [(string) $address, intToHex($position), (string) $tag];
+        return $this->callEndpoint('eth_getBalance', 1, \string::class, $data);
+    }
+
+    /**
+     * Returns the number of transactions sent from an address.
+     * @see https://eth.wiki/json-rpc/API#eth_getTransactionCount
+     *
+     * @param HexAddress $address Address.
+     * @param Tag $data Block number, or "latest", "earliest", "pending" as Tag.
+     *
+     * @return Promise<int> Number of transactions sent from this address.
+     */
+    public function ethGetTransactionCount(HexAddress $address, Tag $tag): Promise
+    {
+        $data = [(string) $address, (string) $tag];
+        return $this->callEndpoint('eth_getTransactionCount', 1, \int::class, $data);
+    }
+
+    /**
+     * Returns the number of transactions sent from an address.
+     * @see https://eth.wiki/json-rpc/API#eth_getTransactionCount
+     *
+     * @param Hash32 $hash Hash of a block.
+     *
+     * @return Promise<int> Number of transactions in this block.
+     */
+    public function ethGetBlockTransactionCountByHash(Hash32 $hash): Promise
+    {
+        $data = [(string) $hash];
+        return $this->callEndpoint('eth_getBlockTransactionCountByHash', 1, \int::class, $data);
+    }
+
+    /**
+     * Executes a new message call immediately without creating a transaction
+     * on the block chain.
+     * @see https://eth.wiki/json-rpc/API#eth_sendTransaction
+     *
+     * @param Transaction $transaction The transaction object.
+     *
+     * @return Promise<Hash32> The transaction hash, or zero hash if not yet available.
+     */
+    public function ethSendTransaction(Transaction $transaction): Promise
+    {
+        $data = [$transaction];
+        return $this->callEndpoint('eth_sendTransaction', 1, Hash32::class, $data);
+    }
+
+    /**
+     * Executes a new message call immediately without creating a transaction
+     * on the block chain.
+     * @see https://eth.wiki/json-rpc/API#eth_sendRawTransaction
+     *
+     * @param string $data The signed transaction data.
+     *
+     * @return Promise<Hash32> The transaction hash, or zero hash if not yet available.
+     */
+    public function ethSendRawTransaction(string $data): Promise
+    {
+        return $this->callEndpoint('eth_sendRawTransaction', 1, Hash32::class, [$data]);
+    }
+
+    /**
+     * Executes a new message call immediately without creating a transaction
+     * on the block chain.
+     * @see https://eth.wiki/json-rpc/API#eth_call
+     *
+     * @param Transaction $transaction The transaction call object.
+     * @param Tag $data Block number, or "latest", "earliest", "pending" as Tag.
+     *
+     * @return Promise<string> The return value of executed contract.
+     */
+    public function ethCall(Transaction $transaction, Tag $tag): Promise
+    {
+        $data = [$transaction, (string) $tag];
+        return $this->callEndpoint('eth_call', 1, \string::class, $data);
+    }
+
+    /**
+     * Generates and returns an estimate of how much gas is necessary to allow
+     * the transaction to complete. The transaction will not be added to the
+     * blockchain. Note that the estimate may be significantly more than the
+     * amount of gas actually used by the transaction, for a variety of reasons
+     * including EVM mechanics and node performance.
+     * @see https://eth.wiki/json-rpc/API#eth_estimateGas
+     *
+     * @param Transaction $transaction The transaction call object.
+     * @param Tag $data Block number, or "latest", "earliest", "pending" as Tag.
+     *
+     * @return Promise<Gwei|string> Gwei of the gas estimate (string without bcmath).
+     */
+    public function ethEstimateGas(Transaction $transaction, Tag $tag): Promise
+    {
+        $data = [$transaction, (string) $tag];
+        return $this->callEndpoint('eth_estimateGas', 1, Gwei::class, $data);
     }
 
     /**
      * Returns information about a block by hash.
+     * @see https://eth.wiki/json-rpc/API#eth_getBlockByHash
      *
      * @param Hash32 $hash Hash of a block.
      * @param bool $Full If true it returns the full transaction objects.
@@ -288,13 +361,26 @@ class Client extends Base
      */
     public function ethGetBlockByHash(Hash32 $hash, bool $Full = true): Promise
     {
-        return $this->callEndpoint(
-            'eth_getBlockByHash',
-            1,
-            Block::class,
-            [$hash, $Full]
-        );
+        $data = [(string) $hash, $Full];
+        return $this->callEndpoint('eth_getBlockByHash', 1, Block::class, $data);
     }
+
+    /**
+     * Returns information about a block by block number.
+     * @see https://eth.wiki/json-rpc/API#eth_getBlockByNumber
+     *
+     * @param Tag $tag Block number, or "latest", "earliest", "pending" as Tag.
+     * @param bool $Full If true it returns the full transaction objects.
+     *
+     * @return Promise<Block>
+     */
+    public function ethGetBlockByNumber(Tag $tag, bool $Full = true): Promise
+    {
+        $data = [(string) $tag, $Full];
+        return $this->callEndpoint('eth_getBlockByNumber', 1, Block::class, $data);
+    }
+
+    #endregion
 
     /**
      * Call an Ethereum RPC endpoint.
@@ -303,6 +389,7 @@ class Client extends Base
      * @param integer $id The method id from the RPC specification.
      * @param string $class The response result type.
      * @param array $data The RPC response data.
+     * @param bool $iterate Whether to iterate the result data.
      *
      * @return Promise<mixed>
      */
@@ -310,9 +397,10 @@ class Client extends Base
         string $method,
         int $id,
         string $class,
-        array $data = []
+        array $data = [],
+        bool $iterate = false
     ): Promise {
-        return $this->getResult($this->getMessage($method, $id, $data), $class);
+        return $this->getResult($this->getMessage($method, $id, $data), $class, $iterate);
     }
 
     /**
@@ -324,17 +412,21 @@ class Client extends Base
      * @throws RPCExceptionInterface
      * @return Promise<mixed>
      */
-    public function getResult(RequestInterface $request, string $class): Promise
-    {
+    public function getResult(
+        RequestInterface $request,
+        string $class,
+        bool $iterate = false
+    ): Promise {
         return $this->send($request)
-            ->then(function (ResponseInterface $resp) use ($class) {
+            ->then(function (ResponseInterface $resp) use ($class, $iterate) {
                 $resp = $this->factory()->makeFromResponse($resp);
                 $error = $resp->getRPCError();
-                $data = $resp->getRPCResult();
 
                 if ($error === null) {
+                    $data = $resp->getRPCResult();
+
                     if (isset(Client::$dataMap[$class])) {
-                        if (is_array($data)) {
+                        if ($iterate) {
                             return array_map(Client::$dataMap[$class], $data);
                         } else {
                             return Client::$dataMap[$class]($data);
@@ -366,4 +458,16 @@ class Client extends Base
     ): RequestInterface {
         return $this->factory()->makeRequest($method, $id, $params);
     }
+
+    #region BaseInterface Members
+
+    /**
+     * {@inheritDoc}
+     */
+    public function factory(): RPCFactoryInterface
+    {
+        return parent::factory();
+    }
+
+    #endregion
 }
