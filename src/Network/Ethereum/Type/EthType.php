@@ -34,8 +34,8 @@ abstract class EthType extends Typing
      */
     public static function stripPrefix(string $input): string
     {
-        if (0 === stripos($input, static::HEX_PREFIX, 0)) {
-            return ltrim($input, static::HEX_PREFIX);
+        if (substr($input, 0, strlen(static::HEX_PREFIX)) == static::HEX_PREFIX) {
+            $input = substr($input, strlen(static::HEX_PREFIX));
         }
 
         return $input;
@@ -50,7 +50,7 @@ abstract class EthType extends Typing
      */
     public static function appendPrefix(string $input): string
     {
-        if (0 === stripos($input, static::HEX_PREFIX, 0)) {
+        if (substr($input, 0, strlen(static::HEX_PREFIX)) == static::HEX_PREFIX) {
             return $input;
         }
 

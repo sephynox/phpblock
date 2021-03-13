@@ -37,12 +37,15 @@ final class ClientTest extends TestCase
     private static Hash32 $transactionHash;
     private static Hash32 $testBlockHash;
     private static Gwei $testGwei;
+    private static Tag $testTag;
+    private static Tag $testBlockTag;
     private static int $testBlockNumber;
 
     public static function setUpBeforeClass(): void
     {
         static::$testGwei = new Gwei(Gwei::ethToGwei('.0001'));
         static::$client = new Client($_ENV['ETH_TEST_CLIENT']);
+        static::$testTag = new Tag(Tag::LATEST);
 
         static::$client->ethAccounts()
             ->then(function (array $hexAddresses) {
@@ -61,6 +64,7 @@ final class ClientTest extends TestCase
             })->then(function (TransactionReceipt $receipt) {
                 static::$testBlockHash = $receipt->blockHash;
                 static::$testBlockNumber = $receipt->blockNumber;
+                static::$testBlockTag = new Tag($receipt->blockNumber);
             });
 
         static::$client->run();
@@ -83,6 +87,7 @@ final class ClientTest extends TestCase
      */
     public function testWeb3ClientVersionCall(): void
     {
+        /** @var string $ver */
         $ver = null;
 
         static::$client->web3ClientVersion()
@@ -95,12 +100,37 @@ final class ClientTest extends TestCase
     }
 
     /**
+     * Test web3_sha3 call.
+     *
+     * @return void
+     */
+    public function testWeb3SHA3Call(): void
+    {
+        /** @var Hash32 $hash */
+        $hash = null;
+        $string = "Hello World!";
+        $hash32 = new Hash32($string);
+        $expect = "0x" . Keccak::hash($string, 256);
+
+        static::$client->web3SHA3(new HexString($string, true))
+            ->then(function ($hash32) use (&$hash) {
+                $hash = $hash32;
+            });
+
+        static::$client->run();
+        $this->assertInstanceOf(Hash32::class, $hash);
+        $this->assertEquals($hash, $hash32);
+        $this->assertEquals($expect, (string) $hash);
+    }
+
+    /**
      * Test net_version call.
      *
      * @return void
      */
     public function testNetVersionCall(): void
     {
+        /** @var string $ver */
         $ver = null;
 
         static::$client->netVersion()
@@ -119,6 +149,7 @@ final class ClientTest extends TestCase
      */
     public function testNetListeningCall(): void
     {
+        /** @var bool $listen */
         $listen = null;
 
         static::$client->netListening()
@@ -137,6 +168,7 @@ final class ClientTest extends TestCase
      */
     public function testNetPeerCountCall(): void
     {
+        /** @var int $peers */
         $peers = null;
 
         static::$client->netPeerCount()
@@ -155,6 +187,7 @@ final class ClientTest extends TestCase
      */
     public function testProtocolVersionCall(): void
     {
+        /** @var string $ver */
         $ver = null;
 
         static::$client->ethProtocolVersion()
@@ -167,35 +200,13 @@ final class ClientTest extends TestCase
     }
 
     /**
-     * Test web3_sha3 call.
-     *
-     * @return void
-     */
-    public function testWeb3SHA3Call(): void
-    {
-        $hash = null;
-        $string = "Hello World!";
-        $hash32 = new Hash32($string);
-        $expect = "0x" . Keccak::hash($string, 256);
-
-        static::$client->web3SHA3(new HexString($string, true))
-            ->then(function ($hash32) use (&$hash) {
-                $hash = $hash32;
-            });
-
-        static::$client->run();
-        $this->assertInstanceOf(Hash32::class, $hash);
-        $this->assertEquals($hash, $hash32);
-        $this->assertEquals($expect, (string) $hash);
-    }
-
-    /**
      * Test eth_syncing call.
      *
      * @return void
      */
     public function testSyncingCall(): void
     {
+        /** @var SyncStatus|bool $stat */
         $stat = null;
 
         static::$client->ethSyncing()
@@ -214,6 +225,7 @@ final class ClientTest extends TestCase
      */
     public function testEthCoinbaseCall(): void
     {
+        /** @var HexAddress $addr */
         $addr = null;
 
         static::$client->ethCoinbase()
@@ -232,6 +244,7 @@ final class ClientTest extends TestCase
      */
     public function testEthMiningCall(): void
     {
+        /** @var bool $mining */
         $mining = null;
 
         static::$client->ethMining()
@@ -250,6 +263,7 @@ final class ClientTest extends TestCase
      */
     public function testEthHashrateCall(): void
     {
+        /** @var int $rate */
         $rate = null;
 
         static::$client->ethHashrate()
@@ -268,19 +282,20 @@ final class ClientTest extends TestCase
      */
     public function testEthGasPriceCall(): void
     {
-        $price = null;
+        /** @var Gwei|int $gas */
+        $gas = null;
 
         static::$client->ethGasPrice()
-            ->then(function ($gwei) use (&$price) {
-                $price = $gwei;
+            ->then(function ($gwei) use (&$gas) {
+                $gas = $gwei;
             });
 
         static::$client->run();
 
         if (function_exists('bcdiv')) {
-            $this->assertInstanceOf(Gwei::class, $price);
+            $this->assertInstanceOf(Gwei::class, $gas);
         } else {
-            $this->assertIsString($price);
+            $this->assertIsString($gas);
         }
     }
 
@@ -291,6 +306,7 @@ final class ClientTest extends TestCase
      */
     public function testEthAccountsCall(): void
     {
+        /** @var array[HexAddress] */
         $addresses = [];
 
         static::$client->ethAccounts()
@@ -313,6 +329,7 @@ final class ClientTest extends TestCase
      */
     public function testEthBlockNumberCall(): void
     {
+        /** @var int $block */
         $block = null;
 
         static::$client->ethBlockNumber()
@@ -333,7 +350,7 @@ final class ClientTest extends TestCase
     {
         $balance = null;
 
-        static::$client->ethGetBalance(static::$testAddress, new Tag(Tag::LATEST))
+        static::$client->ethGetBalance(static::$testAddress, static::$testTag)
             ->then(function ($gwei) use (&$balance) {
                 $balance = $gwei;
             });
@@ -354,8 +371,9 @@ final class ClientTest extends TestCase
      */
     public function testEthGetTransactionCountCall(): void
     {
+        /** @var int $count */
         $count = null;
-        $tag = new Tag(Tag::LATEST);
+        $tag = static::$testTag;
 
         static::$client->ethGetTransactionCount(static::$testAddress, $tag)
             ->then(function (int $int) use (&$count) {
@@ -373,6 +391,7 @@ final class ClientTest extends TestCase
      */
     public function testEthSendTransactionCall(): void
     {
+        /** @var Hash32 $hash */
         $hash = null;
         $transaction = Transaction::make(static::$to, static::$from, static::$testGwei);
 
@@ -392,10 +411,11 @@ final class ClientTest extends TestCase
      */
     public function testEthCallCall(): void
     {
+        /** @var string $data */
         $data = null;
         $transaction = Transaction::make(static::$to, static::$from);
 
-        static::$client->ethCall($transaction, new Tag(Tag::LATEST))
+        static::$client->ethCall($transaction, static::$testTag)
             ->then(function (string $string) use (&$data) {
                 $data = $string;
             });
@@ -411,10 +431,11 @@ final class ClientTest extends TestCase
      */
     public function testEthEstimateGasCall(): void
     {
+        /** @var Gwei|int $gas */
         $gas = null;
         $transaction = Transaction::make(static::$to, static::$from);
 
-        static::$client->ethEstimateGas($transaction, new Tag(Tag::LATEST))
+        static::$client->ethEstimateGas($transaction, static::$testTag)
             ->then(function ($gwei) use (&$gas) {
                 $gas = $gwei;
             });
@@ -435,6 +456,7 @@ final class ClientTest extends TestCase
      */
     public function testEthGetBlockTransactionCountByHashCall(): void
     {
+        /** @var int $count */
         $count = null;
 
         static::$client->ethGetBlockTransactionCountByHash(static::$testBlockHash)
@@ -453,15 +475,17 @@ final class ClientTest extends TestCase
      */
     public function testEthGetBlockByNumberCall(): void
     {
+        /** @var Block $testBlock */
         $testBlock = null;
 
-        static::$client->ethGetBlockByNumber(new Tag(Tag::EARLIEST), true)
+        static::$client->ethGetBlockByNumber(static::$testBlockTag, true)
             ->then(function (Block $block) use (&$testBlock) {
                 $testBlock = $block;
             });
 
         static::$client->run();
         $this->assertInstanceOf(Block::class, $testBlock);
+        $this->assertEquals(static::$testBlockHash, $testBlock->hash);
     }
 
     /**
@@ -516,9 +540,8 @@ final class ClientTest extends TestCase
     {
         /** @var Transaction $trans */
         $trans = null;
-        $tag = new Tag(static::$testBlockNumber);
 
-        static::$client->ethGetTransactionByBlockNumberAndIndex($tag, 0)
+        static::$client->ethGetTransactionByBlockNumberAndIndex(static::$testTag, 0)
             ->then(function (Transaction $transaction) use (&$trans) {
                 $trans = $transaction;
             });
@@ -564,6 +587,25 @@ final class ClientTest extends TestCase
         $testBlock = null;
 
         static::$client->ethGetUncleByBlockHashAndIndex(static::$testBlockHash, 0)
+            ->then(function (Block $block) use (&$testBlock) {
+                $testBlock = $block;
+            });
+
+        static::$client->run();
+        $this->assertInstanceOf(Block::class, $testBlock);
+    }
+
+    /**
+     * Test eth_blockNumber call.
+     *
+     * @return void
+     */
+    public function testGetUncleByBlockNumberAndIndexCall(): void
+    {
+        /** @var Block $testBlock */
+        $testBlock = null;
+
+        static::$client->ethGetUncleByBlockNumberAndIndex(static::$testTag, 0)
             ->then(function (Block $block) use (&$testBlock) {
                 $testBlock = $block;
             });

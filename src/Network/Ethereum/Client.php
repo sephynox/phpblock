@@ -460,6 +460,22 @@ final class Client extends Base
         return $this->callEndpoint('eth_getUncleByBlockHashAndIndex', 1, Block::class, $data);
     }
 
+    /**
+     * Returns information about a uncle of a block by number and uncle
+     * index position.
+     * @see https://eth.wiki/json-rpc/API#eth_getUncleByBlockNumberAndIndex
+     *
+     * @param Tag $tag Block number, or "latest", "earliest", "pending" as Tag.
+     * @param int The uncle’s index position.
+     *
+     * @return Promise<Block> A block object, or null when no block was found.
+     */
+    public function ethGetUncleByBlockNumberAndIndex(Tag $tag, int $position): Promise
+    {
+        $data = [(string) $tag, EthType::appendPrefix(intToHex($position))];
+        return $this->callEndpoint('eth_getUncleByBlockNumberAndIndex', 1, Block::class, $data);
+    }
+
     #endregion
 
     /**
