@@ -22,29 +22,48 @@ use PHPBlock\Network\Ethereum\Model\Gwei;
 use PHPBlock\Network\Ethereum\Model\SyncStatus;
 use PHPBlock\Network\Ethereum\Model\Tag;
 use PHPBlock\Network\Ethereum\Model\Transaction;
+use PHPBlock\Network\Ethereum\Model\TransactionReceipt;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
 
 final class ClientTest extends TestCase
 {
-    private Client $client;
-    private HexAddress $to;
-    private HexAddress $from;
-    private HexAddress $testAddress;
+    private static Client $client;
+    private static HexAddress $to;
+    private static HexAddress $from;
+    private static HexAddress $testAddress;
+    private static Transaction $testSendTransaction;
+    private static Hash32 $transactionHash;
+    private static Hash32 $testBlockHash;
+    private static Gwei $testGwei;
+    private static int $testBlockNumber;
 
-    public function setUp(): void
+    public static function setUpBeforeClass(): void
     {
-        $this->client = new Client($_ENV['ETH_TEST_CLIENT']);
+        static::$testGwei = new Gwei(Gwei::ethToGwei('.0001'));
+        static::$client = new Client($_ENV['ETH_TEST_CLIENT']);
 
-        $this->client->ethAccounts()
-            ->then(function (array $hexAddresses) use (&$addresses) {
-                $this->to = $hexAddresses[0];
-                $this->from = $hexAddresses[1];
-                $this->testAddress = $hexAddresses[array_rand($hexAddresses)];
+        static::$client->ethAccounts()
+            ->then(function (array $hexAddresses) {
+                static::$to = $hexAddresses[0];
+                static::$from = $hexAddresses[1];
+                static::$testAddress = $hexAddresses[array_rand($hexAddresses)];
+                static::$testSendTransaction = Transaction::make(
+                    static::$to,
+                    static::$from,
+                    static::$testGwei
+                );
+                return static::$client->ethSendTransaction(static::$testSendTransaction);
+            })->then(function (Hash32 $hash) {
+                static::$transactionHash = $hash;
+                return static::$client->ethGetTransactionReceipt($hash);
+            })->then(function (TransactionReceipt $receipt) {
+                static::$testBlockHash = $receipt->blockHash;
+                static::$testBlockNumber = $receipt->blockNumber;
             });
 
-        $this->client->run();
+        static::$client->run();
     }
 
     /**
@@ -54,7 +73,7 @@ final class ClientTest extends TestCase
      */
     public function testClientInit(): void
     {
-        $this->assertInstanceOf(Client::class, $this->client);
+        $this->assertInstanceOf(Client::class, static::$client);
     }
 
     /**
@@ -62,16 +81,16 @@ final class ClientTest extends TestCase
      *
      * @return void
      */
-    public function testweb3ClientVersionCall(): void
+    public function testWeb3ClientVersionCall(): void
     {
         $ver = null;
 
-        $this->client->web3ClientVersion()
+        static::$client->web3ClientVersion()
             ->then(function (string $string) use (&$ver) {
                 $ver = $string;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertNotNull($ver);
     }
 
@@ -84,12 +103,12 @@ final class ClientTest extends TestCase
     {
         $ver = null;
 
-        $this->client->netVersion()
+        static::$client->netVersion()
             ->then(function (string $string) use (&$ver) {
                 $ver = $string;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertNotNull($ver);
     }
 
@@ -102,12 +121,12 @@ final class ClientTest extends TestCase
     {
         $listen = null;
 
-        $this->client->netListening()
+        static::$client->netListening()
             ->then(function (bool $bool) use (&$listen) {
                 $listen = $bool;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertIsBool($listen);
     }
 
@@ -120,12 +139,12 @@ final class ClientTest extends TestCase
     {
         $peers = null;
 
-        $this->client->netPeerCount()
+        static::$client->netPeerCount()
             ->then(function (int $int) use (&$peers) {
                 $peers = $int;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertIsInt($peers);
     }
 
@@ -138,12 +157,12 @@ final class ClientTest extends TestCase
     {
         $ver = null;
 
-        $this->client->ethProtocolVersion()
+        static::$client->ethProtocolVersion()
             ->then(function (string $version) use (&$ver) {
                 $ver = $version;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertNotNull($ver);
     }
 
@@ -159,12 +178,12 @@ final class ClientTest extends TestCase
         $hash32 = new Hash32($string);
         $expect = "0x" . Keccak::hash($string, 256);
 
-        $this->client->web3SHA3(new HexString($string, true))
+        static::$client->web3SHA3(new HexString($string, true))
             ->then(function ($hash32) use (&$hash) {
                 $hash = $hash32;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertInstanceOf(Hash32::class, $hash);
         $this->assertEquals($hash, $hash32);
         $this->assertEquals($expect, (string) $hash);
@@ -179,12 +198,12 @@ final class ClientTest extends TestCase
     {
         $stat = null;
 
-        $this->client->ethSyncing()
+        static::$client->ethSyncing()
             ->then(function ($status) use (&$stat) {
                 $stat = $status;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertTrue($stat instanceof SyncStatus || is_bool($stat));
     }
 
@@ -197,12 +216,12 @@ final class ClientTest extends TestCase
     {
         $addr = null;
 
-        $this->client->ethCoinbase()
+        static::$client->ethCoinbase()
             ->then(function (HexAddress $address) use (&$addr) {
                 $addr = $address;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertInstanceOf(HexAddress::class, $addr);
     }
 
@@ -215,12 +234,12 @@ final class ClientTest extends TestCase
     {
         $mining = null;
 
-        $this->client->ethMining()
+        static::$client->ethMining()
             ->then(function (bool $bool) use (&$mining) {
                 $mining = $bool;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertIsBool($mining);
     }
 
@@ -233,12 +252,12 @@ final class ClientTest extends TestCase
     {
         $rate = null;
 
-        $this->client->ethHashrate()
+        static::$client->ethHashrate()
             ->then(function (int $int) use (&$rate) {
                 $rate = $int;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertIsInt($rate);
     }
 
@@ -251,12 +270,12 @@ final class ClientTest extends TestCase
     {
         $price = null;
 
-        $this->client->ethGasPrice()
+        static::$client->ethGasPrice()
             ->then(function ($gwei) use (&$price) {
                 $price = $gwei;
             });
 
-        $this->client->run();
+        static::$client->run();
 
         if (function_exists('bcdiv')) {
             $this->assertInstanceOf(Gwei::class, $price);
@@ -274,12 +293,12 @@ final class ClientTest extends TestCase
     {
         $addresses = [];
 
-        $this->client->ethAccounts()
+        static::$client->ethAccounts()
             ->then(function (array $hexAddresses) use (&$addresses) {
                 $addresses = $hexAddresses;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertIsArray($addresses);
 
         foreach ($addresses as $address) {
@@ -296,12 +315,12 @@ final class ClientTest extends TestCase
     {
         $block = null;
 
-        $this->client->ethBlockNumber()
+        static::$client->ethBlockNumber()
             ->then(function (int $int) use (&$block) {
                 $block = $int;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertIsInt($block);
     }
 
@@ -314,12 +333,12 @@ final class ClientTest extends TestCase
     {
         $balance = null;
 
-        $this->client->ethGetBalance($this->testAddress, new Tag(Tag::LATEST))
+        static::$client->ethGetBalance(static::$testAddress, new Tag(Tag::LATEST))
             ->then(function ($gwei) use (&$balance) {
                 $balance = $gwei;
             });
 
-        $this->client->run();
+        static::$client->run();
 
         if (function_exists('bcdiv')) {
             $this->assertInstanceOf(Gwei::class, $balance);
@@ -338,12 +357,12 @@ final class ClientTest extends TestCase
         $count = null;
         $tag = new Tag(Tag::LATEST);
 
-        $this->client->ethGetTransactionCount($this->testAddress, $tag)
+        static::$client->ethGetTransactionCount(static::$testAddress, $tag)
             ->then(function (int $int) use (&$count) {
                 $count = $int;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertIsInt($count);
     }
 
@@ -355,18 +374,14 @@ final class ClientTest extends TestCase
     public function testEthSendTransactionCall(): void
     {
         $hash = null;
-        $transaction = Transaction::make(
-            $this->to,
-            $this->from,
-            new Gwei(Gwei::ethToGwei('.0001'))
-        );
+        $transaction = Transaction::make(static::$to, static::$from, static::$testGwei);
 
-        $this->client->ethSendTransaction($transaction)
+        static::$client->ethSendTransaction($transaction)
             ->then(function (Hash32 $hash32) use (&$hash) {
                 $hash = $hash32;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertInstanceOf(Hash32::class, $hash);
     }
 
@@ -378,14 +393,14 @@ final class ClientTest extends TestCase
     public function testEthCallCall(): void
     {
         $data = null;
-        $transaction = Transaction::make($this->to, $this->from);
+        $transaction = Transaction::make(static::$to, static::$from);
 
-        $this->client->ethCall($transaction, new Tag(Tag::LATEST))
+        static::$client->ethCall($transaction, new Tag(Tag::LATEST))
             ->then(function (string $string) use (&$data) {
                 $data = $string;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertIsString($data);
     }
 
@@ -397,14 +412,14 @@ final class ClientTest extends TestCase
     public function testEthEstimateGasCall(): void
     {
         $gas = null;
-        $transaction = Transaction::make($this->to, $this->from);
+        $transaction = Transaction::make(static::$to, static::$from);
 
-        $this->client->ethEstimateGas($transaction, new Tag(Tag::LATEST))
+        static::$client->ethEstimateGas($transaction, new Tag(Tag::LATEST))
             ->then(function ($gwei) use (&$gas) {
                 $gas = $gwei;
             });
 
-        $this->client->run();
+        static::$client->run();
 
         if (function_exists('bcdiv')) {
             $this->assertInstanceOf(Gwei::class, $gas);
@@ -422,14 +437,12 @@ final class ClientTest extends TestCase
     {
         $count = null;
 
-        $this->client->ethGetBlockByNumber(new Tag(Tag::EARLIEST), true)
-            ->then(function (Block $block) {
-                return $this->client->ethGetBlockTransactionCountByHash($block->hash);
-            })->then(function (int $int) use (&$count) {
+        static::$client->ethGetBlockTransactionCountByHash(static::$testBlockHash)
+            ->then(function (int $int) use (&$count) {
                 $count = $int;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertIsInt($count);
     }
 
@@ -440,15 +453,15 @@ final class ClientTest extends TestCase
      */
     public function testEthGetBlockByNumberCall(): void
     {
-        $blck = null;
+        $testBlock = null;
 
-        $this->client->ethGetBlockByNumber(new Tag(Tag::EARLIEST), true)
-            ->then(function (Block $block) use (&$blck) {
-                $blck = $block;
+        static::$client->ethGetBlockByNumber(new Tag(Tag::EARLIEST), true)
+            ->then(function (Block $block) use (&$testBlock) {
+                $testBlock = $block;
             });
 
-        $this->client->run();
-        $this->assertInstanceOf(Block::class, $blck);
+        static::$client->run();
+        $this->assertInstanceOf(Block::class, $testBlock);
     }
 
     /**
@@ -458,26 +471,19 @@ final class ClientTest extends TestCase
      */
     public function testEthGetTransactionByHashCall(): void
     {
-        /** @var Hash32 $hash */
-        $hash = null;
         /** @var Transaction $trans */
         $trans = null;
-        $value = new Gwei(Gwei::ethToGwei('.0001'));
-        $transact = Transaction::make($this->to, $this->from, $value);
 
-        $this->client->ethSendTransaction($transact)
-            ->then(function (Hash32 $hash32) use (&$hash) {
-                $hash = $hash32;
-                return $this->client->ethGetTransactionByHash($hash32);
-            })->then(function (Transaction $transaction) use (&$trans) {
+        static::$client->ethGetTransactionByHash(static::$transactionHash)
+            ->then(function (Transaction $transaction) use (&$trans) {
                 $trans = $transaction;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertInstanceOf(Transaction::class, $trans);
         $this->assertInstanceOf(Hash32::class, $trans->hash);
-        $this->assertEquals($hash, $trans->hash);
-        $this->assertEquals($value, $trans->value);
+        $this->assertEquals(static::$transactionHash, $trans->hash);
+        $this->assertEquals(static::$testGwei, $trans->value);
     }
 
     /**
@@ -489,24 +495,16 @@ final class ClientTest extends TestCase
     {
         /** @var Transaction $trans */
         $trans = null;
-        $value = new Gwei(Gwei::ethToGwei('.0001'));
-        $transact = Transaction::make($this->to, $this->from, $value);
 
-        $this->client->ethSendTransaction($transact)
-            ->then(function (Hash32 $hash32) {
-                return $this->client->ethGetTransactionByHash($hash32);
-            })->then(function (Transaction $transaction) {
-                return $transaction->blockHash;
-            })->then(function (Hash32 $hash32) {
-                return $this->client->ethGetTransactionByBlockHashAndIndex($hash32, 0);
-            })->then(function (Transaction $transaction) use (&$trans) {
+        static::$client->ethGetTransactionByBlockHashAndIndex(static::$testBlockHash, 0)
+            ->then(function (Transaction $transaction) use (&$trans) {
                 $trans = $transaction;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertInstanceOf(Transaction::class, $trans);
         $this->assertInstanceOf(Hash32::class, $trans->hash);
-        $this->assertEquals($value, $trans->value);
+        $this->assertEquals(static::$testGwei, $trans->value);
     }
 
     /**
@@ -518,25 +516,59 @@ final class ClientTest extends TestCase
     {
         /** @var Transaction $trans */
         $trans = null;
-        $value = new Gwei(Gwei::ethToGwei('.0001'));
-        $transact = Transaction::make($this->to, $this->from, $value);
+        $tag = new Tag(static::$testBlockNumber);
 
-        $this->client->ethSendTransaction($transact)
-            ->then(function (Hash32 $hash32) {
-                return $this->client->ethGetTransactionByHash($hash32);
-            })->then(function (Transaction $transaction) {
-                return [$transaction->blockNumber, $transaction->transactionIndex];
-            })->then(function (array $data) {
-                [$int, $index] = $data;
-                $tag = new Tag($int);
-                return $this->client->ethGetTransactionByBlockNumberAndIndex($tag, $index);
-            })->then(function (Transaction $transaction) use (&$trans) {
+        static::$client->ethGetTransactionByBlockNumberAndIndex($tag, 0)
+            ->then(function (Transaction $transaction) use (&$trans) {
                 $trans = $transaction;
             });
 
-        $this->client->run();
+        static::$client->run();
         $this->assertInstanceOf(Transaction::class, $trans);
         $this->assertInstanceOf(Hash32::class, $trans->hash);
-        $this->assertEquals($value, $trans->value);
+        $this->assertEquals(static::$testGwei, $trans->value);
+    }
+
+    /**
+     * Test eth_call call.
+     *
+     * @return void
+     */
+    public function testEthGetTransactionReceipt(): void
+    {
+        /** @var TransactionReceipt $receipt */
+        $receipt = null;
+
+        static::$client->ethGetTransactionReceipt(static::$transactionHash)
+            ->then(function (TransactionReceipt $transactionReceipt) use (&$receipt) {
+                $receipt = $transactionReceipt;
+            });
+
+        static::$client->run();
+        $this->assertInstanceOf(TransactionReceipt::class, $receipt);
+        $this->assertInstanceOf(Hash32::class, $receipt->transactionHash);
+        $this->assertIsInt($receipt->status);
+        $this->assertEquals(static::$transactionHash, $receipt->transactionHash);
+        $this->assertEquals(static::$to, $receipt->to);
+        $this->assertEquals(static::$from, $receipt->from);
+    }
+
+    /**
+     * Test eth_blockNumber call.
+     *
+     * @return void
+     */
+    public function testGetUncleByBlockHashAndIndexCall(): void
+    {
+        /** @var Block $testBlock */
+        $testBlock = null;
+
+        static::$client->ethGetUncleByBlockHashAndIndex(static::$testBlockHash, 0)
+            ->then(function (Block $block) use (&$testBlock) {
+                $testBlock = $block;
+            });
+
+        static::$client->run();
+        $this->assertInstanceOf(Block::class, $testBlock);
     }
 }

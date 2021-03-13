@@ -18,20 +18,20 @@ use JsonSerializable;
 
 abstract class Typing implements JsonSerializable
 {
-    private $val;
+    private $value;
 
     public function __construct($value, bool $raw = false)
     {
         if (!$raw) {
-            $this->val = $this->unpack(trim($value));
+            $this->value = $this->unpack(trim($value));
         } else {
-            $this->val = $value;
+            $this->value = $value;
         }
     }
 
     public function __toString()
     {
-        return (string) $this->pack($this->val);
+        return (string) $this->pack($this->value);
     }
 
     #region JsonSerializable Members
@@ -50,7 +50,7 @@ abstract class Typing implements JsonSerializable
      */
     public function value()
     {
-        return $this->val;
+        return $this->value;
     }
 
     /**

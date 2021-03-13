@@ -25,6 +25,7 @@ use PHPBlock\Network\Ethereum\Model\Gwei;
 use PHPBlock\Network\Ethereum\Model\SyncStatus;
 use PHPBlock\Network\Ethereum\Model\Tag;
 use PHPBlock\Network\Ethereum\Model\Transaction;
+use PHPBlock\Network\Ethereum\Model\TransactionReceipt;
 use PHPBlock\Network\Ethereum\Type\Address;
 use PHPBlock\Network\Ethereum\Type\BlockIdentifier;
 use PHPBlock\Network\Ethereum\Type\BlockNumber;
@@ -59,6 +60,7 @@ final class Client extends Base
                 Transaction::class => fn ($v) => new Transaction($v),
                 \int::class => fn ($v) => hexToInt(EthType::stripPrefix($v)),
                 ChecksumAddress::class => fn ($v) => new ChecksumAddress($v),
+                TransactionReceipt::class => fn ($v) => new TransactionReceipt($v),
                 DateTime::class => fn ($v) => (new DateTime())->setTimestamp(hexToInt($v)),
                 SyncStatus::class => fn ($v) => is_bool($v) ? (bool) $v : new SyncStatus($v),
                 BlockIdentifier::class => fn ($v) => new BlockIdentifier($v),
@@ -358,7 +360,7 @@ final class Client extends Base
      * @param Hash32 $hash Hash of a block.
      * @param bool $Full If true it returns the full transaction objects.
      *
-     * @return Promise<Block>
+     * @return Promise<Block> A block object, or null when no block was found.
      */
     public function ethGetBlockByHash(Hash32 $hash, bool $Full = true): Promise
     {
@@ -426,6 +428,36 @@ final class Client extends Base
     {
         $data = [(string) $tag, EthType::appendPrefix(intToHex($position))];
         return $this->callEndpoint('eth_getTransactionByBlockNumberAndIndex', 1, Transaction::class, $data);
+    }
+
+    /**
+     * Returns the receipt of a transaction by transaction hash.
+     * @see https://eth.wiki/json-rpc/API#eth_getTransactionReceipt
+     *
+     * @param Hash32 $hash Hash of a transaction.
+     *
+     * @return Promise<TransactionReceipt|null> A transaction receipt object, or null.
+     */
+    public function ethGetTransactionReceipt(Hash32 $hash): Promise
+    {
+        $data = [(string) $hash];
+        return $this->callEndpoint('eth_getTransactionReceipt', 1, TransactionReceipt::class, $data);
+    }
+
+    /**
+     * Returns information about a uncle of a block by hash and
+     * uncle index position.
+     * @see https://eth.wiki/json-rpc/API#eth_getUncleByBlockHashAndIndex
+     *
+     * @param Hash32 $hash Hash of a block.
+     * @param int $position Integer of the the uncle’s index position.
+     *
+     * @return Promise<Block> A block object, or null when no block was found.
+     */
+    public function ethGetUncleByBlockHashAndIndex(Hash32 $hash, int $position): Promise
+    {
+        $data = [(string) $hash, EthType::appendPrefix(intToHex($position))];
+        return $this->callEndpoint('eth_getUncleByBlockHashAndIndex', 1, Block::class, $data);
     }
 
     #endregion

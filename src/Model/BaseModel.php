@@ -19,6 +19,10 @@ abstract class BaseModel
         $m = $this->map();
 
         foreach ($data as $k => $v) {
+            if (!$v) {
+                continue;
+            }
+
             # Allow for model custom data mutations (arrays)
             $f = 'mutate' . ucfirst($k);
 

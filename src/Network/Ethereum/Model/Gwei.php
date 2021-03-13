@@ -25,7 +25,7 @@ class Gwei extends EthModel
      */
     public function __construct(string $value, bool $wei = false)
     {
-        if ($wei) {
+        if ($wei && $value > static::$wei) {
             $this->value = static::weiToGwei($value);
         } else {
             $this->value = $value;

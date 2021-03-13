@@ -24,11 +24,12 @@ class TransactionReceipt extends EthModel
     public int $blockNumber;
     public HexAddress $from;
     public HexAddress $to;
-    public int $cumulativeGasUsed;
-    public int $gasUsed;
+    public $cumulativeGasUsed;
+    public $gasUsed;
     public ?HexAddress $contractAddress;
-    public array $logs;
+    public array $logs;  # TODO
     public int $logsBloom;  #TODO
+    public int $status;
 
     private static $map;
 
@@ -59,10 +60,11 @@ class TransactionReceipt extends EthModel
                 'blockNumber' => Client::$dataMap[\int::class],
                 'from' => Client::$dataMap[HexAddress::class],
                 'to' => Client::$dataMap[HexAddress::class],
-                'cumulativeGasUsed' => Client::$dataMap[int::class],
-                'gasUsed' => Client::$dataMap[\int::class],
+                'gasUsed' => Client::$dataMap[Gwei::class],
+                'cumulativeGasUsed' => Client::$dataMap[Gwei::class],
                 'contractAddress' => Client::$dataMap[HexAddress::class],
-                'logsBloom' => Client::$dataMap[\int::class]
+                'logsBloom' => Client::$dataMap[\int::class],
+                'status' => Client::$dataMap[\int::class],
             ];
         }
 
