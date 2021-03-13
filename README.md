@@ -43,8 +43,8 @@ $Ethereum->ethProtocolVersion()
 $Ethereum->run();
 ```
 ### Promises Example
-You can chain calls and pass along additional information to next link in
-the chain promise chain.
+You can chain calls and pass along additional information to next the link in
+the promise chain.
 ```php
 <?php
 
@@ -58,6 +58,7 @@ use PHPBlock\Network\Ethereum\Type\HexAddress;
 use function PHPBlock\Helper\pass;
 
 $Ethereum = new PHPBlock\Network\Ethereum\Client();
+# Lightweight types for all data elements.
 $value = new Gwei(Gwei::ethToGwei('.0001'));
 $to = new HexAddress('0x579ACE666FBbb2cE728B5F335E69Dc7A2C8623D4');
 $from = new HexAddress('0x268d5eBe19aF845c23E0Fd4290725E9679Cd1B7d');
@@ -65,6 +66,7 @@ $sendTransaction = Transaction::make($to, $from, $value);
 
 $Ethereum->ethSendTransaction($sendTransaction)
     ->then(function (Hash32 $hash32) use ($Ethereum) {
+        # Pass additional values easily similar to a tuple.
         return pass($Ethereum->ethGetTransactionByHash($hash32), $hash32);
     })->then(function (array $data) {
         [$receiveTransaction, $hash32] = $data;
