@@ -16,6 +16,7 @@ use PHPBlock\Network\Ethereum\Client;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
+use PHPBlock\Network\Ethereum\Type\Signature;
 
 class Transaction extends EthModel
 {
@@ -32,8 +33,8 @@ class Transaction extends EthModel
     public ?int $nonce = null;
     public ?int $transactionIndex = null;
     public ?int $v = null;
-    public ?Hash32 $r = null;
-    public ?Hash32 $s = null;
+    public ?Signature $r = null;
+    public ?Signature $s = null;
 
     private static $map;
 
@@ -89,8 +90,8 @@ class Transaction extends EthModel
                 'transactionIndex' => Client::$dataMap[\int::class],
                 'value' => Client::$dataMap[Gwei::class],
                 'v' => Client::$dataMap[\int::class],
-                'r' => Client::$dataMap[Hash32::class],
-                's' => Client::$dataMap[Hash32::class]
+                'r' => Client::$dataMap[Signature::class],
+                's' => Client::$dataMap[Signature::class]
             ];
         }
 

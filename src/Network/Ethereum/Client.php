@@ -34,6 +34,7 @@ use PHPBlock\Network\Ethereum\Type\EthType;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
+use PHPBlock\Network\Ethereum\Type\Signature;
 
 use function PHPBlock\Helper\hexToInt;
 use function PHPBlock\Helper\intToHex;
@@ -55,6 +56,7 @@ final class Client extends Base
                 \bool::class => fn ($v) => (bool) $v,
                 \string::class => fn ($v) => (string) $v,
                 Address::class => fn ($v) => new Address($v),
+                Signature::class => fn ($v) => new Signature($v),
                 HexAddress::class => fn ($v) => new HexAddress($v),
                 Gwei::class => fn ($v) => EthType::gweiOrString($v),
                 Transaction::class => fn ($v) => new Transaction($v),
@@ -525,6 +527,10 @@ final class Client extends Base
                         if ($iterate) {
                             return array_map(Client::$dataMap[$class], $data);
                         } else {
+                            if ($class == Hash32::class && strlen($data) < 64) {
+                                $v = 1;
+                            }
+
                             return Client::$dataMap[$class]($data);
                         }
                     }
