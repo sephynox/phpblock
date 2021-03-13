@@ -13,6 +13,7 @@
 namespace PHPBlock\Network\Ethereum\Model;
 
 use TypeError;
+use PHPBlock\Network\Ethereum\Type\EthType;
 
 use function PHPBlock\Helper\intToHex;
 
@@ -53,7 +54,7 @@ class Tag extends EthModel
     public function __toString()
     {
         if (is_int($this->value)) {
-            return intToHex($this->value);
+            return EthType::appendPrefix(intToHex($this->value));
         } else {
             return $this->value;
         }

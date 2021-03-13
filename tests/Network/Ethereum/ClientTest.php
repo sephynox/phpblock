@@ -458,9 +458,9 @@ final class ClientTest extends TestCase
      */
     public function testEthGetTransactionByHashCall(): void
     {
-        /** @var Hash32 */
+        /** @var Hash32 $hash */
         $hash = null;
-        /** @var Transaction */
+        /** @var Transaction $trans */
         $trans = null;
         $value = new Gwei(Gwei::ethToGwei('.0001'));
         $transact = Transaction::make($this->to, $this->from, $value);
@@ -468,10 +468,8 @@ final class ClientTest extends TestCase
         $this->client->ethSendTransaction($transact)
             ->then(function (Hash32 $hash32) use (&$hash) {
                 $hash = $hash32;
-                return $hash;
-            })->then(function (Hash32 $hash32) {
                 return $this->client->ethGetTransactionByHash($hash32);
-            })->then(function ($transaction) use (&$trans) {
+            })->then(function (Transaction $transaction) use (&$trans) {
                 $trans = $transaction;
             });
 
@@ -479,6 +477,66 @@ final class ClientTest extends TestCase
         $this->assertInstanceOf(Transaction::class, $trans);
         $this->assertInstanceOf(Hash32::class, $trans->hash);
         $this->assertEquals($hash, $trans->hash);
+        $this->assertEquals($value, $trans->value);
+    }
+
+    /**
+     * Test eth_call call.
+     *
+     * @return void
+     */
+    public function testEthGetTransactionByBlockHashAndIndexCall(): void
+    {
+        /** @var Transaction $trans */
+        $trans = null;
+        $value = new Gwei(Gwei::ethToGwei('.0001'));
+        $transact = Transaction::make($this->to, $this->from, $value);
+
+        $this->client->ethSendTransaction($transact)
+            ->then(function (Hash32 $hash32) {
+                return $this->client->ethGetTransactionByHash($hash32);
+            })->then(function (Transaction $transaction) {
+                return $transaction->blockHash;
+            })->then(function (Hash32 $hash32) {
+                return $this->client->ethGetTransactionByBlockHashAndIndex($hash32, 0);
+            })->then(function (Transaction $transaction) use (&$trans) {
+                $trans = $transaction;
+            });
+
+        $this->client->run();
+        $this->assertInstanceOf(Transaction::class, $trans);
+        $this->assertInstanceOf(Hash32::class, $trans->hash);
+        $this->assertEquals($value, $trans->value);
+    }
+
+    /**
+     * Test eth_call call.
+     *
+     * @return void
+     */
+    public function testEthGetTransactionByBlockNumberAndIndexCall(): void
+    {
+        /** @var Transaction $trans */
+        $trans = null;
+        $value = new Gwei(Gwei::ethToGwei('.0001'));
+        $transact = Transaction::make($this->to, $this->from, $value);
+
+        $this->client->ethSendTransaction($transact)
+            ->then(function (Hash32 $hash32) {
+                return $this->client->ethGetTransactionByHash($hash32);
+            })->then(function (Transaction $transaction) {
+                return [$transaction->blockNumber, $transaction->transactionIndex];
+            })->then(function (array $data) {
+                [$int, $index] = $data;
+                $tag = new Tag($int);
+                return $this->client->ethGetTransactionByBlockNumberAndIndex($tag, $index);
+            })->then(function (Transaction $transaction) use (&$trans) {
+                $trans = $transaction;
+            });
+
+        $this->client->run();
+        $this->assertInstanceOf(Transaction::class, $trans);
+        $this->assertInstanceOf(Hash32::class, $trans->hash);
         $this->assertEquals($value, $trans->value);
     }
 }

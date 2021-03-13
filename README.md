@@ -10,7 +10,8 @@ Table of Contents
   - [Supported Platforms](#supported-platforms)
     - [Future Platforms](#future-platforms)
   - [Documentation](#documentation)
-    - [Quick start Example](#quick-start-example)
+    - [Quick Start Example](#quick-start-example)
+    - [Promises Example](#promises-example)
     - [Install](#install)
     - [Testing](#testing)
   - [License](#license)
@@ -37,6 +38,40 @@ $Ethereum = new PHPBlock\Network\Ethereum\Client();
 $Ethereum->ethProtocolVersion()
     ->then(function (string $version) {
         echo "The protocol version is: " . $version . "\n";
+    });
+
+$Ethereum->run();
+```
+### Promises Example
+You can chain calls and pass along additional information to next link in
+the chain promise chain.
+```php
+<?php
+
+require_once('./vendor/autoload.php');
+
+use PHPBlock\Network\Ethereum\Model\Gwei;
+use PHPBlock\Network\Ethereum\Model\Transaction;
+use PHPBlock\Network\Ethereum\Type\Hash32;
+use PHPBlock\Network\Ethereum\Type\HexAddress;
+
+use function PHPBlock\Helper\pass;
+
+$Ethereum = new PHPBlock\Network\Ethereum\Client();
+$value = new Gwei(Gwei::ethToGwei('.0001'));
+$to = new HexAddress('0x579ACE666FBbb2cE728B5F335E69Dc7A2C8623D4');
+$from = new HexAddress('0x268d5eBe19aF845c23E0Fd4290725E9679Cd1B7d');
+$sendTransaction = Transaction::make($to, $from, $value);
+
+$Ethereum->ethSendTransaction($sendTransaction)
+    ->then(function (Hash32 $hash32) use ($Ethereum) {
+        return pass($Ethereum->ethGetTransactionByHash($hash32), $hash32);
+    })->then(function (array $data) {
+        [$receiveTransaction, $hash32] = $data;
+
+        if ($receiveTransaction->hash == $hash32) {
+            echo "The hashes match!";
+        }
     });
 
 $Ethereum->run();

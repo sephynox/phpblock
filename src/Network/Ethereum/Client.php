@@ -51,13 +51,13 @@ final class Client extends Base
     {
         if (!isset(static::$dataMap)) {
             static::$dataMap = [
-                \int::class => fn ($v) => (int) $v,
                 \bool::class => fn ($v) => (bool) $v,
                 \string::class => fn ($v) => (string) $v,
                 Address::class => fn ($v) => new Address($v),
                 HexAddress::class => fn ($v) => new HexAddress($v),
                 Gwei::class => fn ($v) => EthType::gweiOrString($v),
                 Transaction::class => fn ($v) => new Transaction($v),
+                \int::class => fn ($v) => hexToInt(EthType::stripPrefix($v)),
                 ChecksumAddress::class => fn ($v) => new ChecksumAddress($v),
                 DateTime::class => fn ($v) => (new DateTime())->setTimestamp(hexToInt($v)),
                 SyncStatus::class => fn ($v) => is_bool($v) ? (bool) $v : new SyncStatus($v),
@@ -254,7 +254,7 @@ final class Client extends Base
      */
     public function ethGetStorageAt(HexAddress $address, int $position, Tag $tag): Promise
     {
-        $data = [(string) $address, intToHex($position), (string) $tag];
+        $data = [(string) $address, EthType::appendPrefix(intToHex($position)), (string) $tag];
         return $this->callEndpoint('eth_getBalance', 1, \string::class, $data);
     }
 
@@ -386,7 +386,7 @@ final class Client extends Base
      * transaction hash.
      * @see https://eth.wiki/json-rpc/API#eth_getTransactionByHash
      *
-     * @param Hash32 $hash Hash of a transaction
+     * @param Hash32 $hash Hash of a transaction.
      *
      * @return Promise<Transaction|null> A transaction object, or null.
      */
@@ -394,6 +394,38 @@ final class Client extends Base
     {
         $data = [(string) $hash];
         return $this->callEndpoint('eth_getTransactionByHash', 1, Transaction::class, $data);
+    }
+
+    /**
+     * Returns the information about a transaction requested by
+     * transaction hash.
+     * @see https://eth.wiki/json-rpc/API#eth_getTransactionByBlockHashAndIndex
+     *
+     * @param Hash32 $hash Hash of a block.
+     * @param int $position Integer of the transaction index position.
+     *
+     * @return Promise<Transaction|null> A transaction object, or null.
+     */
+    public function ethGetTransactionByBlockHashAndIndex(Hash32 $hash, int $position): Promise
+    {
+        $data = [(string) $hash, EthType::appendPrefix(intToHex($position))];
+        return $this->callEndpoint('eth_getTransactionByBlockHashAndIndex', 1, Transaction::class, $data);
+    }
+
+    /**
+     * Returns information about a transaction by block number and
+     * transaction index position.
+     * @see https://eth.wiki/json-rpc/API#eth_getTransactionByBlockNumberAndIndex
+     *
+     * @param Tag $tag Block number, or "latest", "earliest", "pending" as Tag.
+     * @param int $position Integer of the transaction index position.
+     *
+     * @return Promise<Transaction|null> A transaction object, or null.
+     */
+    public function ethGetTransactionByBlockNumberAndIndex(Tag $tag, int $position): Promise
+    {
+        $data = [(string) $tag, EthType::appendPrefix(intToHex($position))];
+        return $this->callEndpoint('eth_getTransactionByBlockNumberAndIndex', 1, Transaction::class, $data);
     }
 
     #endregion
