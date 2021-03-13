@@ -14,20 +14,51 @@ namespace PHPBlock\Network\Ethereum\Model;
 
 use DateTime;
 use PHPBlock\Network\Ethereum\Client;
+use PHPBlock\Network\Ethereum\Type\Address;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
 
 class Message extends EthModel
 {
+    /**
+     * The hash of the message.
+     */
     public Hash32 $hash;
-    public HexAddress $from;
-    public HexAddress $to;
+    /**
+     * The sender of the message, if a sender was specified.
+     */
+    public Address $from;
+    /**
+     * The receiver of the message, if a receiver was specified.
+     */
+    public Address $to;
+    /**
+     * Integer of the time in seconds when this message should expire (?).
+     */
     public DateTime $expiry;
+    /**
+     * Integer of the time the message should float in the system in
+     * seconds (?).
+     */
     public int $ttl;
+    /**
+     * Integer of the unix timestamp when the message was sent.
+     */
     public int $sent;
+    /**
+     * Array of DATA topics the message contained.
+     *
+     * @var HexString[]
+     */
     public array $topics;
-    public HexString $payload;  # TODO
+    /**
+     * The payload of the message.
+     */
+    public HexString $payload;
+    /**
+     * Integer of the work this message required before it was send (?).
+     */
     public int $workProved;
 
     private static $map;
@@ -41,7 +72,7 @@ class Message extends EthModel
      */
     public function mutateTopics(array $data): array
     {
-        return array_map(fn ($v) => new Hash32($v), $data);
+        return array_map(fn ($v) => new HexString($v), $data);
     }
 
     #region BaseModel Members

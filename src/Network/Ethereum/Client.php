@@ -21,6 +21,7 @@ use PHPBlock\JSONRPC\RequestInterface;
 use PHPBlock\JSONRPC\RPCFactoryInterface;
 use PHPBlock\Network\Base;
 use PHPBlock\Network\Ethereum\Model\Block;
+use PHPBlock\Network\Ethereum\Model\Filter;
 use PHPBlock\Network\Ethereum\Model\Gwei;
 use PHPBlock\Network\Ethereum\Model\SyncStatus;
 use PHPBlock\Network\Ethereum\Model\Tag;
@@ -235,12 +236,12 @@ final class Client extends Base
      * Returns the balance of the account of given address.
      * @see https://eth.wiki/json-rpc/API#eth_getBalance
      *
-     * @param HexAddress $address Address to check for balance.
+     * @param Address $address Address to check for balance.
      * @param Tag $data Block number, or "latest", "earliest", "pending" as Tag.
      *
      * @return Promise<Gwei|string> Gwei of the current balance (string without bcmath).
      */
-    public function ethGetBalance(HexAddress $address, Tag $tag): Promise
+    public function ethGetBalance(Address $address, Tag $tag): Promise
     {
         $data = [(string) $address, (string) $tag];
         return $this->callEndpoint('eth_getBalance', 1, Gwei::class, $data);
@@ -250,13 +251,13 @@ final class Client extends Base
      * Returns the value from a storage position at a given address.
      * @see https://eth.wiki/json-rpc/API#eth_getStorageAt
      *
-     * @param HexAddress $address Address of the storage.
+     * @param Address $address Address of the storage.
      * @param int $position Position in the storage.
      * @param Tag $data Block number, or "latest", "earliest", "pending" as Tag.
      *
      * @return Promise<string> The value at this storage position.
      */
-    public function ethGetStorageAt(HexAddress $address, int $position, Tag $tag): Promise
+    public function ethGetStorageAt(Address $address, int $position, Tag $tag): Promise
     {
         $data = [(string) $address, EthType::appendPrefix(intToHex($position)), (string) $tag];
         return $this->callEndpoint('eth_getBalance', 1, \string::class, $data);
@@ -266,12 +267,12 @@ final class Client extends Base
      * Returns the number of transactions sent from an address.
      * @see https://eth.wiki/json-rpc/API#eth_getTransactionCount
      *
-     * @param HexAddress $address Address.
+     * @param Address $address Address.
      * @param Tag $data Block number, or "latest", "earliest", "pending" as Tag.
      *
      * @return Promise<int> Number of transactions sent from this address.
      */
-    public function ethGetTransactionCount(HexAddress $address, Tag $tag): Promise
+    public function ethGetTransactionCount(Address $address, Tag $tag): Promise
     {
         $data = [(string) $address, (string) $tag];
         return $this->callEndpoint('eth_getTransactionCount', 1, \int::class, $data);
@@ -476,6 +477,84 @@ final class Client extends Base
     {
         $data = [(string) $tag, EthType::appendPrefix(intToHex($position))];
         return $this->callEndpoint('eth_getUncleByBlockNumberAndIndex', 1, Block::class, $data);
+    }
+
+    /**
+     * Returns a list of available compilers in the client.
+     * @see https://eth.wiki/json-rpc/API#eth_getCompilers
+     *
+     * @return Promise<array[string]> Array of available compilers.
+     */
+    public function ethGetCompilers(): Promise
+    {
+        return $this->callEndpoint('eth_getCompilers', 1, \string::class, [], true);
+    }
+
+    /**
+     * TODO Solidity
+     * Returns compiled solidity code.
+     * @see https://eth.wiki/json-rpc/API#eth_compileSolidity
+     *
+     * @param string $source The source code.
+     *
+     * @return Promise<string> The compiled source code.
+     */
+    public function ethCompileSolidity(string $source): Promise
+    {
+        return $this->callEndpoint('eth_compileSolidity', 1, \string::class, [$source]);
+    }
+
+    /**
+     * Returns compiled LLL code.
+     * @see https://eth.wiki/json-rpc/API#eth_compileLLL
+     *
+     * @param string $source The source code.
+     *
+     * @return Promise<string> The compiled source code.
+     */
+    public function ethCompileLLL(string $source): Promise
+    {
+        return $this->callEndpoint('eth_compileLLL', 1, \string::class, [$source]);
+    }
+
+    /**
+     * Returns compiled serpent code
+     * @see https://eth.wiki/json-rpc/API#eth_compileSerpent
+     *
+     * @param string $source The source code.
+     *
+     * @return Promise<string> The compiled source code.
+     */
+    public function ethCompileSerpent(string $source): Promise
+    {
+        return $this->callEndpoint('eth_compileSerpent', 1, \string::class, [$source]);
+    }
+
+    /**
+     * Creates a filter object, based on filter options, to notify when the
+     * state changes (logs). To check if the state has changed,
+     * call eth_getFilterChanges.
+     * @see https://eth.wiki/json-rpc/API#eth_newFilter
+     *
+     * @param Filter $filter The filter options.
+     *
+     * @return Promise<int> A filter id.
+     */
+    public function ethNewFilter(Filter $filter): Promise
+    {
+        return $this->callEndpoint('eth_newFilter', 1, \int::class, [$filter]);
+    }
+
+    /**
+     * Creates a filter in the node, to notify when a new block arrives.
+     * To check if the state has changed, call eth_getFilterChanges.
+     * @see https://eth.wiki/json-rpc/API#eth_newBlockFilter
+     *
+     * @return Promise<int> A filter id.
+     */
+    public function ethNewBlockFilter(): Promise
+    {
+        return $this->callEndpoint('eth_newBlockFilter', 1, \int::class);
     }
 
     #endregion

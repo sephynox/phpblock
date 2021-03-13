@@ -13,22 +13,68 @@
 namespace PHPBlock\Network\Ethereum\Model;
 
 use PHPBlock\Network\Ethereum\Client;
+use PHPBlock\Network\Ethereum\Type\Address;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 
 class TransactionReceipt extends EthModel
 {
+    /**
+     * Hash of the transaction.
+     */
     public Hash32 $transactionHash;
+    /**
+     * Integer of the transactions index position in the block.
+     */
     public int $transactionIndex;
+    /**
+     * Hash of the block where this transaction was in.
+     */
     public Hash32 $blockHash;
+    /**
+     * Block number where this transaction was in.
+     */
     public int $blockNumber;
-    public HexAddress $from;
-    public HexAddress $to;
+    /**
+     * Address of the sender.
+     */
+    public Address $from;
+    /**
+     * Address of the receiver. null when it is a contract creation transaction.
+     */
+    public Address $to;
+    /**
+     * The total amount of gas used when this transaction was executed in
+     * the block.
+     *
+     * @var Gwei|string
+     */
     public $cumulativeGasUsed;
+    /**
+     * The amount of gas used by this specific transaction alone.
+     *
+     * @var Gwei|string
+     */
     public $gasUsed;
-    public ?HexAddress $contractAddress;
+    /**
+     * The contract address created, if the transaction was a contract
+     * creation, otherwise null.
+     */
+    public ?Address $contractAddress;
+    /**
+     * Array of log objects, which this transaction generated.
+     *
+     * @var Log[]
+     */
     public array $logs;  # TODO
+    /**
+     * 256 Bytes - Bloom filter for light clients to quickly retrieve
+     * related logs.
+     */
     public int $logsBloom;  #TODO
+    /**
+     * Either 1 (success) or 0 (failure)
+     */
     public int $status;
 
     private static $map;

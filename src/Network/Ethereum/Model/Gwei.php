@@ -14,7 +14,13 @@ namespace PHPBlock\Network\Ethereum\Model;
 
 class Gwei extends EthModel
 {
+    /**
+     * 1 Gwei.
+     */
     private static string $ether = '0.000000001';
+    /**
+     * 1 Gwei.
+     */
     private static string $wei = '1000000000';
     private string $value;
 

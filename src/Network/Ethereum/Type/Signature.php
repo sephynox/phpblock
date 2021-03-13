@@ -29,6 +29,13 @@ class Signature extends EthType
         }
 
         $strValue = strtolower($this->stripPrefix($value));
+
+        if (strlen($strValue) == 63) {
+            # The ECDSA signature is sometimes 63...
+            # TODO Figure out why
+            $strValue .= '0';
+        }
+
         return hexToBytes($strValue);
     }
 

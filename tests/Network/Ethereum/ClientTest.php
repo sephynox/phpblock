@@ -18,11 +18,13 @@ use kornrunner\Keccak;
 use PHPUnit\Framework\TestCase;
 use PHPBlock\Network\Ethereum\Client;
 use PHPBlock\Network\Ethereum\Model\Block;
+use PHPBlock\Network\Ethereum\Model\Filter;
 use PHPBlock\Network\Ethereum\Model\Gwei;
 use PHPBlock\Network\Ethereum\Model\SyncStatus;
 use PHPBlock\Network\Ethereum\Model\Tag;
 use PHPBlock\Network\Ethereum\Model\Transaction;
 use PHPBlock\Network\Ethereum\Model\TransactionReceipt;
+use PHPBlock\Network\Ethereum\Type\Address;
 use PHPBlock\Network\Ethereum\Type\Hash32;
 use PHPBlock\Network\Ethereum\Type\HexAddress;
 use PHPBlock\Network\Ethereum\Type\HexString;
@@ -30,9 +32,9 @@ use PHPBlock\Network\Ethereum\Type\HexString;
 final class ClientTest extends TestCase
 {
     private static Client $client;
-    private static HexAddress $to;
-    private static HexAddress $from;
-    private static HexAddress $testAddress;
+    private static Address $to;
+    private static Address $from;
+    private static Address $testAddress;
     private static Transaction $testSendTransaction;
     private static Hash32 $transactionHash;
     private static Hash32 $testBlockHash;
@@ -385,6 +387,25 @@ final class ClientTest extends TestCase
     }
 
     /**
+     * Test eth_blockNumber call.
+     *
+     * @return void
+     */
+    public function testEthGetBlockTransactionCountByHashCall(): void
+    {
+        /** @var int $count */
+        $count = null;
+
+        static::$client->ethGetBlockTransactionCountByHash(static::$testBlockHash)
+            ->then(function (int $int) use (&$count) {
+                $count = $int;
+            });
+
+        static::$client->run();
+        $this->assertIsInt($count);
+    }
+
+    /**
      * Test eth_call call.
      *
      * @return void
@@ -450,26 +471,27 @@ final class ClientTest extends TestCase
     }
 
     /**
-     * Test eth_blockNumber call.
+     * Test eth_getBlockByHash call.
      *
      * @return void
      */
-    public function testEthGetBlockTransactionCountByHashCall(): void
+    public function testEthGetBlockByHashCall(): void
     {
-        /** @var int $count */
-        $count = null;
+        /** @var Block $testBlock */
+        $testBlock = null;
 
-        static::$client->ethGetBlockTransactionCountByHash(static::$testBlockHash)
-            ->then(function (int $int) use (&$count) {
-                $count = $int;
+        static::$client->ethGetBlockByHash(static::$testBlockHash, true)
+            ->then(function (Block $block) use (&$testBlock) {
+                $testBlock = $block;
             });
 
         static::$client->run();
-        $this->assertIsInt($count);
+        $this->assertInstanceOf(Block::class, $testBlock);
+        $this->assertEquals(static::$testBlockHash, $testBlock->hash);
     }
 
     /**
-     * Test eth_blockNumber call.
+     * Test eth_getBlockByNumber call.
      *
      * @return void
      */
@@ -489,7 +511,7 @@ final class ClientTest extends TestCase
     }
 
     /**
-     * Test eth_call call.
+     * Test eth_getTransactionByHash call.
      *
      * @return void
      */
@@ -511,7 +533,7 @@ final class ClientTest extends TestCase
     }
 
     /**
-     * Test eth_call call.
+     * Test eth_getTransactionByBlockHashAndIndex call.
      *
      * @return void
      */
@@ -532,7 +554,7 @@ final class ClientTest extends TestCase
     }
 
     /**
-     * Test eth_call call.
+     * Test eth_getTransactionByBlockNumberAndIndex call.
      *
      * @return void
      */
@@ -553,7 +575,7 @@ final class ClientTest extends TestCase
     }
 
     /**
-     * Test eth_call call.
+     * Test eth_getTransactionReceipt call.
      *
      * @return void
      */
@@ -577,7 +599,7 @@ final class ClientTest extends TestCase
     }
 
     /**
-     * Test eth_blockNumber call.
+     * Test eth_getUncleByBlockHashAndIndex call.
      *
      * @return void
      */
@@ -596,7 +618,7 @@ final class ClientTest extends TestCase
     }
 
     /**
-     * Test eth_blockNumber call.
+     * Test eth_getUncleByBlockNumberAndIndex call.
      *
      * @return void
      */
@@ -612,5 +634,71 @@ final class ClientTest extends TestCase
 
         static::$client->run();
         $this->assertInstanceOf(Block::class, $testBlock);
+    }
+
+    /**
+     * Test eth_getCompilers call.
+     *
+     * @return void
+     */
+    public function testEthGetCompilersCall(): void
+    {
+        /** @var string $data */
+        $data = null;
+        $transaction = Transaction::make(static::$to, static::$from);
+
+        static::$client->ethGetCompilers($transaction, static::$testTag)
+            ->then(function (array $compilers) use (&$data) {
+                $data = $compilers;
+            });
+
+        static::$client->run();
+        $this->assertIsArray($data);
+    }
+
+    /**
+     * TODO
+     * Test eth_compileSolidity call.
+     */
+    public function testEthCompileSolidityCall(): void
+    {
+        $this->assertTrue(true);
+    }
+
+    /**
+     * TODO
+     * Test eth_compileLLL call.
+     */
+    public function testEthCompileLLLCall(): void
+    {
+        $this->assertTrue(true);
+    }
+
+    /**
+     * TODO
+     * Test eth_compileSerpent call.
+     */
+    public function testEthCompileSerpentCall(): void
+    {
+        $this->assertTrue(true);
+    }
+
+    /**
+     * Test eth_compileSerpent call.
+     */
+    public function testEthNewFilterCall(): void
+    {
+        /** @var int $filterId */
+        $filterId = null;
+        $filter = Filter::make(static::$testTag);
+
+        static::$client->ethNewFilter($filter)
+            ->then(function (int $int) use (&$filterId) {
+                $filterId = $int;
+            });
+
+        static::$client->run();
+        $this->assertNotNull($filterId);
+        $this->assertIsInt($filterId);
     }
 }

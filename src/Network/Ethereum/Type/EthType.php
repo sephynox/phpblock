@@ -22,7 +22,7 @@ use function PHPBlock\Helper\hexToBigInt;
 abstract class EthType extends Typing
 {
     public const HEX_PREFIX = '0x';
-    public const HEX_INTS = '0123456789';
+    public const HEX_INT = '0123456789';
     public const HEX_CHARS = 'abcdef';
 
     /**
@@ -74,7 +74,7 @@ abstract class EthType extends Typing
         $arrHash = str_split($strHash);
 
         foreach ($arrHash as $i => $v) {
-            if (false !== strpos(EthType::HEX_INTS, $v)) {
+            if (false !== strpos(EthType::HEX_INT, $v)) {
                 $strReturn .= $v;
             } elseif (false !== stripos(EthType::HEX_CHARS, $v)) {
                 $n = hexdec($strHashed[$i]);
