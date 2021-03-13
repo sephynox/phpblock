@@ -12,6 +12,8 @@
 
 namespace PHPBlock\Network\Ethereum\Model;
 
+use PHPBlock\Network\Ethereum\Type\Hash32;
+
 class Filter extends EthModel
 {
     /**
@@ -35,6 +37,15 @@ class Filter extends EthModel
      * @var HexString[]
      */
     public ?array $topics = null;
+    /**
+     * With the addition of EIP-234, blockHash will be a new filter option
+     * which restricts the logs returned to the single block with the 32-byte
+     * hash blockHash. Using blockHash is equivalent to
+     * fromBlock = toBlock = the block number with hash blockHash.
+     * If blockHash is present in in the filter criteria, then neither
+     * fromBlock nor toBlock are allowed.
+     */
+    public ?Hash32 $blockhash = null;
 
     /**
      * Alias for constructor.

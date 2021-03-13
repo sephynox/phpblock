@@ -39,8 +39,10 @@ final class ClientTest extends TestCase
     private static Hash32 $transactionHash;
     private static Hash32 $testBlockHash;
     private static Gwei $testGwei;
+    private static Block $testBlock;
     private static Tag $testTag;
     private static Tag $testBlockTag;
+    private static int $testFilterId;
     private static int $testBlockNumber;
 
     public static function setUpBeforeClass(): void
@@ -67,6 +69,15 @@ final class ClientTest extends TestCase
                 static::$testBlockHash = $receipt->blockHash;
                 static::$testBlockNumber = $receipt->blockNumber;
                 static::$testBlockTag = new Tag($receipt->blockNumber);
+
+                return static::$client->ethGetBlockByHash($receipt->blockHash);
+            })->then(function (Block $block) {
+                static::$testBlock = $block;
+            });
+
+        static::$client->ethNewPendingTransactionFilter()
+            ->then(function (int $int) {
+                static::$testFilterId = $int;
             });
 
         static::$client->run();
@@ -643,7 +654,7 @@ final class ClientTest extends TestCase
      */
     public function testEthGetCompilersCall(): void
     {
-        /** @var string $data */
+        /** @var array[string] $data */
         $data = null;
         $transaction = Transaction::make(static::$to, static::$from);
 
@@ -684,7 +695,7 @@ final class ClientTest extends TestCase
     }
 
     /**
-     * Test eth_compileSerpent call.
+     * Test eth_newFilter call.
      */
     public function testEthNewFilterCall(): void
     {
@@ -700,5 +711,159 @@ final class ClientTest extends TestCase
         static::$client->run();
         $this->assertNotNull($filterId);
         $this->assertIsInt($filterId);
+    }
+
+    /**
+     * Test eth_newBlockFilter call.
+     */
+    public function testEthNewBlockFilterCall(): void
+    {
+        /** @var int $filterId */
+        $filterId = null;
+
+        static::$client->ethNewBlockFilter()
+            ->then(function (int $int) use (&$filterId) {
+                $filterId = $int;
+            });
+
+        static::$client->run();
+        $this->assertNotNull($filterId);
+        $this->assertIsInt($filterId);
+    }
+
+    /**
+     * Test eth_newPendingTransactionFilter call.
+     */
+    public function testEthNewPendingTransactionFilterCall(): void
+    {
+        /** @var int $filterId */
+        $filterId = null;
+
+        static::$client->ethNewPendingTransactionFilter()
+            ->then(function (int $int) use (&$filterId) {
+                $filterId = $int;
+            });
+
+        static::$client->run();
+        $this->assertNotNull($filterId);
+        $this->assertIsInt($filterId);
+    }
+
+    /**
+     * Test eth_uninstallFilter call.
+     */
+    public function testEthUninstallFilterCall(): void
+    {
+        /** @var bool $blnSuccess */
+        $blnSuccess = null;
+
+        static::$client->ethUninstallFilter(static::$testFilterId)
+            ->then(function (bool $bool) use (&$blnSuccess) {
+                $blnSuccess = $bool;
+            });
+
+        static::$client->run();
+        $this->assertNotNull($blnSuccess);
+        $this->assertIsBool($blnSuccess);
+    }
+
+    /**
+     * Test eth_getFilterChanges call.
+     */
+    public function testEthGetFilterChangesCall(): void
+    {
+        static::$client->ethGetFilterChanges(static::$testFilterId)
+            ->then(function (array $array) {
+                $this->assertEquals([], $array);
+                return static::$client->ethNewPendingTransactionFilter();
+            })->then(function (int $int) {
+                return static::$client->ethGetFilterChanges($int);
+            })->then(function (array $array) {
+                foreach ($array as $filter) {
+                    $this->assertInstanceOf(Hash32::class, $filter);
+                }
+
+                $filter = Filter::make(new Tag(Tag::LATEST));
+                return static::$client->ethNewFilter($filter);
+            })->then(function (int $int) {
+                return static::$client->ethGetFilterChanges($int);
+            })->then(function (array $array) {
+                # TODO
+                foreach ($array as $filter) {
+                    $this->assertInstanceOf(Log::class, $filter);
+                }
+            });
+
+        static::$client->run();
+    }
+
+    /**
+     * Test eth_getLogs call.
+     */
+    public function testEthGetFilterLogs(): void
+    {
+        /** @var array $arrLogs */
+        $arrLogs = null;
+
+        static::$client->ethGetFilterLogs(static::$testFilterId)
+            ->then(function (array $array) use (&$arrLogs) {
+                $arrLogs = $array;
+            });
+
+        static::$client->run();
+        $this->assertNotNull($arrLogs);
+        $this->assertIsArray($arrLogs);
+    }
+
+    /**
+     * # TODO expecting unknown argument not defined in RPC specification...
+     * Test eth_getWork call.
+     *
+     * @return void
+     */
+    public function testEthGetWorkCall(): void
+    {
+        $this->assertTrue(true);
+        // /** @var Hash32 $hash */
+        // $hashes = null;
+
+        // static::$client->ethGetWork(static::$testBlock->hash)
+        //     ->then(function (array $array) use (&$hashes) {
+        //         $hashes = $array;
+        //     });
+
+        // static::$client->run();
+        // $this->assertIsArray($hashes);
+    }
+
+    /**
+     * # TODO
+     * Test eth_submitWork call.
+     *
+     * @return void
+     */
+    public function testEthSubmitWorkCall(): void
+    {
+        $this->assertTrue(true);
+    }
+
+    /**
+     * Test shh_version call.
+     *
+     * @return void
+     */
+    public function testShhVersionCall(): void
+    {
+        /** @var string $data */
+        $data = null;
+
+        static::$client->shhVersion()
+            ->then(function (string $string) use (&$data) {
+                $data = $string;
+            });
+
+        static::$client->run();
+        $this->assertNotNull($data);
+        $this->assertIsString($data);
     }
 }

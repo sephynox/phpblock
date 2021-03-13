@@ -13,6 +13,7 @@
 namespace PHPBlock\Network\Ethereum;
 
 use DateTime;
+use Exception;
 use Psr\Http\Message\ResponseInterface;
 use React\Promise\Promise;
 use PHPBlock\JSONRPC\RPCExceptionInterface;
@@ -23,6 +24,7 @@ use PHPBlock\Network\Base;
 use PHPBlock\Network\Ethereum\Model\Block;
 use PHPBlock\Network\Ethereum\Model\Filter;
 use PHPBlock\Network\Ethereum\Model\Gwei;
+use PHPBlock\Network\Ethereum\Model\Log;
 use PHPBlock\Network\Ethereum\Model\SyncStatus;
 use PHPBlock\Network\Ethereum\Model\Tag;
 use PHPBlock\Network\Ethereum\Model\Transaction;
@@ -64,6 +66,7 @@ final class Client extends Base
                 \int::class => fn ($v) => hexToInt(EthType::stripPrefix($v)),
                 ChecksumAddress::class => fn ($v) => new ChecksumAddress($v),
                 TransactionReceipt::class => fn ($v) => new TransactionReceipt($v),
+                Log::class => fn ($v) => is_object($v) ? new Log($v) : new Hash32($v),
                 DateTime::class => fn ($v) => (new DateTime())->setTimestamp(hexToInt($v)),
                 SyncStatus::class => fn ($v) => is_bool($v) ? (bool) $v : new SyncStatus($v),
                 BlockIdentifier::class => fn ($v) => new BlockIdentifier($v),
@@ -542,7 +545,7 @@ final class Client extends Base
      */
     public function ethNewFilter(Filter $filter): Promise
     {
-        return $this->callEndpoint('eth_newFilter', 1, \int::class, [$filter]);
+        return $this->callEndpoint('eth_newFilter', 73, \int::class, [$filter]);
     }
 
     /**
@@ -554,7 +557,147 @@ final class Client extends Base
      */
     public function ethNewBlockFilter(): Promise
     {
-        return $this->callEndpoint('eth_newBlockFilter', 1, \int::class);
+        return $this->callEndpoint('eth_newBlockFilter', 73, \int::class);
+    }
+
+    /**
+     * Creates a filter in the node, to notify when new pending transactions
+     * arrive. To check if the state has changed, call eth_getFilterChanges.
+     * @see https://eth.wiki/json-rpc/API#eth_newPendingTransactionFilter
+     *
+     * @return Promise<int> A filter id.
+     */
+    public function ethNewPendingTransactionFilter(): Promise
+    {
+        return $this->callEndpoint('eth_newPendingTransactionFilter', 73, \int::class);
+    }
+
+    /**
+     * Uninstalls a filter with given id. Should always be called when watch
+     * is no longer needed. Additionally, filters timeout when they are not
+     * requested with eth_getFilterChanges for a period of time.
+     * @see https://eth.wiki/json-rpc/API#eth_uninstallFilter
+     *
+     * @param int A filter id.
+     *
+     * @return Promise<bool> True if filter was uninstalled, otherwise false.
+     */
+    public function ethUninstallFilter(int $filter): Promise
+    {
+        $data = [EthType::appendPrefix(intToHex($filter))];
+        return $this->callEndpoint('eth_uninstallFilter', 73, \bool::class, $data);
+    }
+
+    /**
+     * Polling method for a filter, which returns an array of logs which
+     * occurred since last poll.
+     * @see https://eth.wiki/json-rpc/API#eth_getFilterChanges
+     *
+     * @param int A filter id.
+     *
+     * @return Promise<array[Hash32|Log]> Array of log objects or hashes.
+     * For filters created with eth_newBlockFilter the return are block hashes
+     * For filters created with eth_newPendingTransactionFilter the return
+     * are transaction hashes.
+     * For filters created with eth_newFilter logs are objects
+     */
+    public function ethGetFilterChanges(int $filter): Promise
+    {
+        $data = [EthType::appendPrefix(intToHex($filter))];
+        return $this->callEndpoint('eth_getFilterChanges', 73, Log::class, $data, true);
+    }
+
+    /**
+     * Returns an array of all logs matching filter with given id.
+     * @see https://eth.wiki/json-rpc/API#eth_getFilterLogs
+     *
+     * @param int A filter id.
+     *
+     * @return Promise<array[Hash32|Log]> Array of log objects or hashes.
+     * For filters created with eth_newBlockFilter the return are block hashes
+     * For filters created with eth_newPendingTransactionFilter the return
+     * are transaction hashes.
+     * For filters created with eth_newFilter logs are objects
+     */
+    public function ethGetFilterLogs(int $filter): Promise
+    {
+        $data = [EthType::appendPrefix(intToHex($filter))];
+        return $this->callEndpoint('eth_getFilterLogs', 74, Log::class, $data, true);
+    }
+
+    /**
+     * Returns an array of all logs matching a given filter object.
+     * @see https://eth.wiki/json-rpc/API#eth_getLogs
+     *
+     * @param Filter $filter The filter options.
+     *
+     * @return Promise<array[Hash32|Log]> Array of log objects or hashes.
+     * For filters created with eth_newBlockFilter the return are block hashes
+     * For filters created with eth_newPendingTransactionFilter the return
+     * are transaction hashes.
+     * For filters created with eth_newFilter logs are objects
+     */
+    public function ethGetLogs(Filter $filter): Promise
+    {
+        return $this->callEndpoint('eth_getLogs', 74, Log::class, [$filter], true);
+    }
+
+    /**
+     * Returns the hash of the current block, the seedHash, and the boundary
+     * condition to be met (“target”).
+     * @see https://eth.wiki/json-rpc/API#eth_getWork
+     *
+     * @return Promise<array[Hash32]> Array with the following properties:
+     * Current block header pow-hash.
+     * The seed hash used for the DAG.
+     * The boundary condition (“target”), 2^256 / difficulty.
+     */
+    public function ethGetWork(): Promise
+    {
+        return $this->callEndpoint('eth_getWork', 73, Hash32::class, [], true);
+    }
+
+    /**
+     * Used for submitting a proof-of-work solution.
+     * @see https://eth.wiki/json-rpc/API#eth_submitWork
+     *
+     * @param HexString $nonce The nonce found (64 bits)
+     * @param Hash32 $pow The header’s pow-hash (256 bits)
+     * @param Hash32 $digest The mix digest (256 bits)
+     *
+     * @return Promise<bool> Returns true if solution is valid, otherwise false.
+     */
+    public function ethSubmitWork(HexString $nonce, Hash32 $pow, Hash32 $digest): Promise
+    {
+        $data = [(string) $nonce, (string) $pow, (string) $digest];
+        return $this->callEndpoint('eth_submitWork', 73, \bool::class, $data);
+    }
+
+    /**
+     * Used for submitting a proof-of-work solution.
+     * @see https://eth.wiki/json-rpc/API#eth_submitHashrate
+     *
+     * @return Promise<bool> Returns true if submit successful, otherwise false.
+     */
+    public function ethSubmitHashrate(HexString $hashrate, HexString $id): Promise
+    {
+        $data = [(string) $hashrate, (string) $id];
+        return $this->callEndpoint('eth_submitHashrate', 73, \bool::class, $data);
+    }
+
+    #endregion
+
+    #region Whisper (shh) Calls
+
+    /**
+     * Returns the current whisper protocol version.
+     * @see https://eth.wiki/json-rpc/API#shh_version
+     *
+     * @return Promise<string> The current whisper protocol version.
+     */
+    public function shhVersion(): Promise
+    {
+        return $this->callEndpoint('shh_version', 67, \string::class);
     }
 
     #endregion
@@ -586,7 +729,7 @@ final class Client extends Base
      * @param RequestInterface $response The request object to send.
      * @param string $class The response result type.
      *
-     * @throws RPCExceptionInterface
+     * @throws RPCExceptionInterface|Exception
      * @return Promise<mixed>
      */
     public function getResult(
@@ -606,10 +749,6 @@ final class Client extends Base
                         if ($iterate) {
                             return array_map(Client::$dataMap[$class], $data);
                         } else {
-                            if ($class == Hash32::class && strlen($data) < 64) {
-                                $v = 1;
-                            }
-
                             return Client::$dataMap[$class]($data);
                         }
                     }
@@ -618,7 +757,7 @@ final class Client extends Base
                 } else {
                     throw $error;
                 }
-            }, function (\Exception $exception) {
+            }, function (Exception $exception) {
                 throw $exception;
             });
     }
